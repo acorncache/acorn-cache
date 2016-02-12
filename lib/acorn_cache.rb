@@ -39,13 +39,13 @@ class CapstoneCaching
     @body.each { |part| @cachable_body << part }
     @cachable_body
   end
-  
+
   module RedisCache
     def self.redis
       @redis ||= Redis.new(
-                  host: 'pub-redis-11997.us-east-1-3.7.ec2.redislabs.com',
-                  port: 11997,
-                  password: '123123'
+                  host: ENV["CACHESTORE_HOST"],
+                  port: ENV["CACHESTORE_PORT"],
+                  password: ENV["CACHESTORE_PASSWORD"]
                 )
     end
   end
