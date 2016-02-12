@@ -6,7 +6,7 @@ class AcornCache
   def call(env)
     return [200, cached_headers, [cached_body]] if cached_response(env)
     @status, @headers, @body = @app.call(env)
-    redis.set(env["REQUEST_PATH"], cachable_response) if @status == 200
+    redis.set(env["REQUEST_PATH"], cachable_response) if @status == 200 && eligible_for_caching?
     [@status, @headers, @body]
   end
 
@@ -38,6 +38,11 @@ class AcornCache
     @cachable_body = ''
     @body.each { |part| @cachable_body << part }
     @cachable_body
+  end
+
+  def eligible_for_caching?
+    return false unless @headers["Content-Type"] == "text/html; charset=utf-8"
+    true
   end
 
   module RedisCache
