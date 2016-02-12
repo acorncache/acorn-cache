@@ -1,4 +1,4 @@
-class CapstoneCaching
+class AcornCache
   def initialize(app)
     @app = app
   end
