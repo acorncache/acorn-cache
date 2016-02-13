@@ -1,4 +1,4 @@
-class Rack::AcornCache::Config
+class AcornCache::Config
   def initialize
     config_path = root_directory + "/.acorncache.yml"
     config_yml = File.read(config_path)

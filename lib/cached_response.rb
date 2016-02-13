@@ -1,4 +1,6 @@
-class Rack::AcornCache::CachedResponse < Rack::Response
+require 'rack'
+
+class AcornCache::CachedResponse < Rack::Response
   def initialize(args={})
     super(args["body"], 200, args["header"])
   end

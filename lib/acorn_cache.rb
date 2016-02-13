@@ -5,7 +5,7 @@ require 'rack_response'
 require 'cached_response'
 require 'request'
 
-class Rack::AcornCache
+class AcornCache
   def initialize(app)
     @app = app
     @config = Config.new
