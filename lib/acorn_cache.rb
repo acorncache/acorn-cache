@@ -1,5 +1,9 @@
 require 'rack'
 require 'redis_cache'
+require 'config'
+require 'rack_response'
+require 'cached_response'
+require 'request'
 
 class Rack::AcornCache
   def initialize(app)
@@ -27,9 +31,11 @@ class Rack::AcornCache
   attr_reader :request, :rack_response
 
   def cache_rack_response_if_eligible
-    return unless rack_response.eligible_for_caching?(paths_whitelist)
+    return unless request.get? &&
+                  rack_response.eligible_for_caching?(paths_whitelist)
+
     rack_response.add_from_acorn_cache_header
-    redis.set(rack_response.path, rack_response.to_json)
+    redis.set(rack_response.path, rack_response.finish.to_json)
   end
 
   def return_cached_response?

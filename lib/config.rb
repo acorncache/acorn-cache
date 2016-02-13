@@ -1,4 +1,4 @@
-class Config
+class Rack::AcornCache::Config
   def initialize
     config_path = root_directory + "/.acorncache.yml"
     config_yml = File.read(config_path)
@@ -6,7 +6,7 @@ class Config
   end
 
   def paths_whitelist
-    @config["path_whitelist"]
+    @config["paths_whitelist"]
   end
 
   def root_directory
