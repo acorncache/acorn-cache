@@ -88,6 +88,6 @@ class Rack::AcornCache
   end
 
   def cache_response
-    redis.set(env["REQUEST_PATH"], cachable_response)
+    redis.set(@env["REQUEST_PATH"], cachable_response)
   end
 end
