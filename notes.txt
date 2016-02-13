@@ -1,0 +1,4 @@
+Config Options:
+1) User can specify in .acorncache.yml at rails root
+2) User can visit our rails app, which will generate yml within user redis db.
+3) User can acorncache defaults if no config is specified.
