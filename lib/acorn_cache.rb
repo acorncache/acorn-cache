@@ -1,3 +1,5 @@
+require 'redis_cache'
+
 class AcornCache
   def initialize(app)
     @app = app
@@ -6,7 +8,7 @@ class AcornCache
   def call(env)
     return [200, cached_headers, [cached_body]] if cached_response(env)
     @status, @headers, @body = @app.call(env)
-    redis.set(env["REQUEST_PATH"], cachable_response) if @status == 200 && eligible_for_caching?
+    cache_response if response_eligible_for_caching?
     [@status, @headers, @body]
   end
 
@@ -40,18 +42,11 @@ class AcornCache
     @cachable_body
   end
 
-  def eligible_for_caching?
-    return false unless @headers["Content-Type"] == "text/html; charset=utf-8"
-    true
+  def response_eligible_for_caching?
+    @headers["Content-Type"].include?("text/html") && @status == 200
   end
 
-  module RedisCache
-    def self.redis
-      @redis ||= Redis.new(
-                  host: ENV["CACHESTORE_HOST"],
-                  port: ENV["CACHESTORE_PORT"],
-                  password: ENV["CACHESTORE_PASSWORD"]
-                )
-    end
+  def cache_response
+    redis.set(env["REQUEST_PATH"], cachable_response)
   end
 end
