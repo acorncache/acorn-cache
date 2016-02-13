@@ -4,90 +4,60 @@ require 'redis_cache'
 class Rack::AcornCache
   def initialize(app)
     @app = app
+    @config = Config.new
   end
 
   def call(env)
-    @env = env
+    @request = Request.new(env)
 
-    if url_whitelisted? && cached_response
-      return [200, cached_headers, [cached_body]]
+    if return_cached_response?
+      cached_response.add_x_from_acorn_cache_header
+      return cached_response.finish
     end
 
-    @status, @headers, @body = @app.call(env)
-    cache_response if response_eligible_for_caching?
-    [@status, @headers, @body]
+    status, headers, body = @app.call(env)
+    @rack_response = RackResponse.new(body, status, headers)
+
+    cache_rack_response_if_eligible
+    rack_response.finish
   end
 
   private
 
-  def redis
-    RedisCache.redis
+  attr_reader :request, :rack_response
+
+  def cache_rack_response_if_eligible
+    return unless rack_response.eligible_for_caching?(paths_whitelist)
+    rack_response.add_from_acorn_cache_header
+    redis.set(rack_response.path, rack_response.to_json)
   end
 
-  def url_whitelisted?
-    config["whitelisted_urls"].include?(@env["REQUEST_PATH"])
+  def return_cached_response?
+    paths_whitelist.include?(request.path) && cached_response
   end
 
-  def config
-    @config ||= begin
-      config_path = root_directory + "/.acorncache.yml"
-      config_yml = File.read(config_path)
-      YAML.load(config_yml)
-    end
-  end
-
-  def root_directory
-    @root_dir ||= Rack::Directory.new("").root
+  def paths_whitelist
+    @paths_whitelist ||= config.paths_whitelist
   end
 
   def cached_response
-    cached_response = redis.get(@env["REQUEST_PATH"])
-    return false unless cached_response
-    @cached_response = JSON.parse(cached_response)
+    @cached_response ||=
+      cached_response? || CachedResponse.new(cached_response_hash)
   end
 
-  def cached_headers
-    @cached_response["headers"].merge!("X-From-Redis-Cache" => "true")
+  def cached_response?
+    json_cached_response
   end
 
-  def cached_body
-    @cached_response["body"]
+  def json_cached_response
+    @json_cached_response ||= redis.get(request.path)
   end
 
-  def cachable_response
-    JSON[headers: @headers, body: cachable_body]
+  def cached_reponse_hash
+    JSON.parse(json_cached_response)
   end
 
-  def cachable_body
-    @cachable_body = ''
-    @body.each { |part| @cachable_body << part }
-    @cachable_body
-  end
-
-  def response_eligible_for_caching?
-    return false unless @status == 200
-
-    if config["whitelisted_urls"]
-      url_whitelisted?
-    else
-      permitted_response_content_type?
-    end
-  end
-
-  def permitted_response_content_type?
-    permitted_content_types = config["permitted_content_types"]
-    header_content_type = @headers["Content-Type"]
-
-    if permitted_content_types
-      permitted_content_types.any? do |permitted_content_type|
-        header_content_type.include?(permitted_content_type)
-      end
-    else
-      header_content_type.include?("text/html")
-    end
-  end
-
-  def cache_response
-    redis.set(@env["REQUEST_PATH"], cachable_response)
+  def redis
+    RedisCache.redis
   end
 end
