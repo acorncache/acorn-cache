@@ -1,4 +1,4 @@
-module AcornCache::RedisCache
+module RedisCache
   def self.redis
     @redis ||= Redis.new(host: ENV["ACORNCACHE_HOST"],
                          port: ENV["ACORNCACHE_PORT"].to_i,

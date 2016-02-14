@@ -1,11 +1,10 @@
-require 'rack'
-require 'redis_cache'
 require 'config'
+require 'redis_cache'
 require 'rack_response'
 require 'cached_response'
 require 'request'
 
-class AcornCache
+class Rack::AcornCache
   def initialize(app)
     @app = app
     @config = Config.new
@@ -16,30 +15,26 @@ class AcornCache
 
     if return_cached_response?
       cached_response.add_x_from_acorn_cache_header
-      return cached_response.finish
+      return cached_response.to_a
     end
 
     status, headers, body = @app.call(env)
-    @rack_response = RackResponse.new(body, status, headers)
-
+    @rack_response = RackResponse.new(status, headers, body)
     cache_rack_response_if_eligible
-    rack_response.finish
+    rack_response.to_a
   end
 
   private
 
-  attr_reader :request, :rack_response
+  attr_reader :request, :rack_response, :config
 
   def cache_rack_response_if_eligible
-    return unless request.get? &&
-                  rack_response.eligible_for_caching?(paths_whitelist)
-
-    rack_response.add_from_acorn_cache_header
-    redis.set(rack_response.path, rack_response.finish.to_json)
+    return unless request.get? && paths_whitelist.include?(request.path)
+    redis.set(request.path, rack_response.to_json)
   end
 
   def return_cached_response?
-    paths_whitelist.include?(request.path) && cached_response
+    paths_whitelist.include?(request.path) && cached_response?
   end
 
   def paths_whitelist
@@ -47,19 +42,18 @@ class AcornCache
   end
 
   def cached_response
-    @cached_response ||=
-      cached_response? || CachedResponse.new(cached_response_hash)
+    @cached_response ||= CachedResponse.new(cached_response_hash)
   end
 
   def cached_response?
-    json_cached_response
+    !!json_cached_response
   end
 
   def json_cached_response
     @json_cached_response ||= redis.get(request.path)
   end
 
-  def cached_reponse_hash
+  def cached_response_hash
     JSON.parse(json_cached_response)
   end
 

@@ -1,4 +1,4 @@
 require 'rack'
 
-class AcornCache::Request < Rack::Request; end
+class Request < Rack::Request; end
 
