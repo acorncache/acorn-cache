@@ -17,6 +17,12 @@ class RackResponse < Rack::Response
     status == 200 && !caching_restrictions?
   end
 
+  def cache_if_eligible(redis, request)
+    return unless eligible_for_caching?
+    add_date_header
+    redis.set(request.path, to_json)
+  end
+
   def to_json
     { status: status, headers: headers, body: body_string }.to_json
   end

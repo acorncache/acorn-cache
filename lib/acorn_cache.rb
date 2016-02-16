@@ -12,32 +12,22 @@ class Rack::AcornCache
 
   def call(env)
     @request = Request.new(env)
+    return @app.call unless request.accepts_cached_response?(paths_whitelist)
 
-    if return_cached_response?
+    if cached_response? && cached_response.fresh?(request)
       cached_response.add_x_from_acorn_cache_header
       return cached_response.to_a
     end
 
     status, headers, body = @app.call(env)
     @rack_response = RackResponse.new(status, headers, body)
-    cache_rack_response_if_eligible
+    rack_response.cache_if_eligible(redis, request)
     rack_response.to_a
   end
 
   private
 
   attr_reader :request, :rack_response, :config
-
-  def cache_rack_response_if_eligible
-    return unless request.get? && paths_whitelist.include?(request.path)
-    rack_response.add_date_header
-    redis.set(request.path, rack_response.to_json)
-  end
-
-  def return_cached_response?
-    request.accepts_cached_response?(paths_whitelist) && cached_response? &&
-      cached_response.fresh?(request)
-  end
 
   def paths_whitelist
     @paths_whitelist ||= config.paths_whitelist
