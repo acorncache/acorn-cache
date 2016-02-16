@@ -35,8 +35,8 @@ class Rack::AcornCache
   end
 
   def return_cached_response?
-    paths_whitelist.include?(request.path) && cached_response? &&
-      cached_response.fresh?
+    request.accepts_cached_response?(paths_whitelist) && cached_response? &&
+      cached_response.fresh?(request)
   end
 
   def paths_whitelist

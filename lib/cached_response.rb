@@ -1,4 +1,6 @@
 class CachedResponse
+  include CacheControlRestrictable
+
   DEFAULT_MAX_AGE = 3600
 
   attr_reader :body, :status
@@ -9,8 +11,8 @@ class CachedResponse
     @headers = args["headers"]
   end
 
-  def fresh?
-    Time.now <= expiration_date
+  def fresh?(request)
+    Time.now <= expiration_date(request.max_age_in_seconds)
   end
 
   def add_x_from_acorn_cache_header
@@ -25,12 +27,12 @@ class CachedResponse
 
   attr_reader :headers
 
-  def max_age_in_seconds
-    headers["Cache-Control"][/\d+/].to_i
-  end
-
-  def expiration_date
-    if headers["Cache-Control"]
+  def expiration_date(request_max_age_in_seconds)
+    if request_max_age_in_seconds && max_age_in_seconds && 
+        request_max_age_in_seconds < max_age_in_seconds
+      header_value_to_time("Date") + request_max_age_in_seconds
+    elsif headers["Cache-Control"] &&
+        headers["Cache-Control"].include?("max-age")
       header_value_to_time("Date") + max_age_in_seconds
     elsif headers["Expiration"]
       header_value_to_time("Expiration")

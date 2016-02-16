@@ -1,8 +1,6 @@
 require 'rack'
 
 class RackResponse < Rack::Response
-  CACHE_CONTROL_RESTRICTIONS = ["no-cache", "no-store", "private"]
-
   attr_reader :status, :headers, :body
 
   def initialize(status, headers, body)
@@ -36,10 +34,4 @@ class RackResponse < Rack::Response
   private
 
   attr_reader :headers
-
-  def caching_restrictions?
-    CACHE_CONTROL_RESTRICTIONS.any? do |restriction|
-      headers['Cache-Control'].include?(restriction)
-    end
-  end
 end
