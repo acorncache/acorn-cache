@@ -30,11 +30,13 @@ class Rack::AcornCache
 
   def cache_rack_response_if_eligible
     return unless request.get? && paths_whitelist.include?(request.path)
+    rack_response.add_date_header
     redis.set(request.path, rack_response.to_json)
   end
 
   def return_cached_response?
-    paths_whitelist.include?(request.path) && cached_response?
+    paths_whitelist.include?(request.path) && cached_response? &&
+      cached_response.fresh?
   end
 
   def paths_whitelist
