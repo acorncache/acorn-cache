@@ -21,13 +21,26 @@ class Rack::AcornCache
 
     status, headers, body = @app.call(env)
     @rack_response = RackResponse.new(status, headers, body)
-    rack_response.cache_if_eligible(redis, request)
+    cache_rack_response_if_eligible
+    update_cached_response_date_if_eligible
     rack_response.to_a
   end
 
   private
 
   attr_reader :request, :rack_response, :config
+
+  def update_cached_response_date_if_eligible
+    return unless cached_response || !rack_response.status == 304
+    cached_response.update_date
+    redis.set(request.path, cached_response.to_json)
+  end
+
+  def cache_rack_response_if_eligible
+    return unless rack_response.eligible_for_caching?
+    add_date_header
+    redis.set(request.path, rack_response.to_json)
+  end
 
   def paths_whitelist
     @paths_whitelist ||= config.paths_whitelist

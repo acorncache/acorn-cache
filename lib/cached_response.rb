@@ -19,6 +19,14 @@ class CachedResponse
     headers["X-From-Acorn-Cache"] = "true"
   end
 
+  def update_date
+    headers["Date"] = Time.now.utc.to_s
+  end
+
+  def to_json
+    { headers: headers, status: status, body: body }.to_json
+  end
+
   def to_a
     [status, headers, [body]]
   end
