@@ -1,4 +1,5 @@
 require 'rack'
+require "cache_control_restrictable"
 
 class Request < Rack::Request
   include CacheControlRestrictable

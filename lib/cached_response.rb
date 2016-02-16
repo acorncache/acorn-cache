@@ -1,3 +1,5 @@
+require "cache_control_restrictable"
+
 class CachedResponse
   include CacheControlRestrictable
 
