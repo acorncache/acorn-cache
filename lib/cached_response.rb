@@ -37,7 +37,7 @@ class CachedResponse
 
   def expiration_date(request)
     if max_age_specified?
-      header_value_to_time("Date") + more_restrictive_max_age(response)
+      header_value_to_time("Date") + more_restrictive_max_age(request)
     elsif headers["Expiration"]
       header_value_to_time("Expiration")
     else
