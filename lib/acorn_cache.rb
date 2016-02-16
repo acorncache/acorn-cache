@@ -32,13 +32,14 @@ class Rack::AcornCache
 
   def update_cached_response_date_if_eligible
     return unless cached_response || !rack_response.status == 304
+    binding.pry
     cached_response.update_date
     redis.set(request.path, cached_response.to_json)
   end
 
   def cache_rack_response_if_eligible
     return unless rack_response.eligible_for_caching?
-    add_date_header
+    rack_response.add_date_header
     redis.set(request.path, rack_response.to_json)
   end
 
