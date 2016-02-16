@@ -17,6 +17,10 @@ class CachedResponse
     Time.now <= expiration_date(request)
   end
 
+  def cache_control_header
+    headers["Cache-Control"]
+  end
+
   def add_x_from_acorn_cache_header
     headers["X-From-Acorn-Cache"] = "true"
   end

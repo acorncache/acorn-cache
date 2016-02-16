@@ -1,6 +1,9 @@
 require 'rack'
+require 'cache_control_restrictable'
 
 class RackResponse < Rack::Response
+  include CacheControlRestrictable
+
   attr_reader :status, :headers, :body
 
   def initialize(status, headers, body)
@@ -9,12 +12,20 @@ class RackResponse < Rack::Response
     @body = body
   end
 
+  def cache_control_header
+    headers["Cache-Control"]
+  end
+
   def add_date_header
     @headers["Date"] = Time.now.utc.to_s unless headers["Date"]
   end
 
   def eligible_for_caching?
     status == 200 && !caching_restrictions?
+  end
+
+  def eligible_for_updating?
+    [200, 304].any? { |valid_status| valid_status == status }
   end
 
   def to_json

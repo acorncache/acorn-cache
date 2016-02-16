@@ -12,7 +12,10 @@ class Rack::AcornCache
 
   def call(env)
     @request = Request.new(env)
-    return @app.call unless request.accepts_cached_response?(paths_whitelist)
+
+    unless request.accepts_cached_response?(paths_whitelist)
+      return @app.call(env)
+    end
 
     if cached_response? && cached_response.fresh?(request)
       cached_response.add_x_from_acorn_cache_header
@@ -31,8 +34,7 @@ class Rack::AcornCache
   attr_reader :request, :rack_response, :config
 
   def update_cached_response_date_if_eligible
-    return unless cached_response || !rack_response.status == 304
-    binding.pry
+    return if !cached_response || !rack_response.eligible_for_updating?
     cached_response.update_date
     redis.set(request.path, cached_response.to_json)
   end
