@@ -1,4 +1,5 @@
 require 'acorn_cache/cache_control_restrictable'
+require 'time'
 
 class Rack::AcornCache
   class CachedResponse
@@ -61,7 +62,7 @@ class Rack::AcornCache
     end
 
     def header_value_to_time(header)
-      headers[header].to_time
+      Time.httpdate(headers[header])
     end
   end
 end
