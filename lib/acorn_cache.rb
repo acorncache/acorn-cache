@@ -24,18 +24,17 @@ class Rack::AcornCache
 
     status, headers, body = @app.call(env)
     @rack_response = RackResponse.new(status, headers, body)
-    CacheWriter.update_cache
-    # CacheUpdate.cache_rack_response
-    # CacheUpdate.update_cached_response_date
+    update_cached_response_date_if_eligible
+    cache_rack_response_if_eligible
     rack_response.to_a
   end
 
   private
 
-  attr_reader :request, :rack_response, :config
+  attr_reader :request, :rack_response, :config, :cached_response
 
   def update_cached_response_date_if_eligible
-    return if !cached_response || !rack_response.eligible_for_updating?
+    return unless cached_response && rack_response.eligible_for_updating?
     cached_response.update_date
     redis.set(request.path, cached_response.to_json)
   end
@@ -50,16 +49,13 @@ class Rack::AcornCache
     @paths_whitelist ||= config.paths_whitelist
   end
 
-  def cached_response
-    @cached_response ||= CachedResponse.new(CacheReader.cached_response_hash)
-  end
-
   def cached_response?
-    !!json_cached_response
+    return false unless json_cached_response
+    @cached_response = CachedResponse.new(cached_response_hash)
   end
 
   def json_cached_response
-    @json_cached_response ||= redis.get(request.path)
+    redis.get(request.path)
   end
 
   def cached_response_hash

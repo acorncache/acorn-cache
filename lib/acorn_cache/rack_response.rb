@@ -1,4 +1,4 @@
-require 'cache_control_restrictable'
+require 'acorn_cache/cache_control_restrictable'
 
 class Rack::AcornCache
   class RackResponse < Rack::Response
@@ -17,7 +17,7 @@ class Rack::AcornCache
     end
 
     def add_date_header
-      @headers["Date"] = Time.now.utc.to_s unless headers["Date"]
+      @headers["Date"] = Time.now.httpdate
     end
 
     def eligible_for_caching?

@@ -1,5 +1,5 @@
 require 'rack/request'
-require 'cache_control_restrictable'
+require 'acorn_cache/cache_control_restrictable'
 
 class Rack::AcornCache
   class Request < Rack::Request

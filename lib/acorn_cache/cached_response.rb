@@ -1,4 +1,4 @@
-require 'cache_control_restrictable'
+require 'acorn_cache/cache_control_restrictable'
 
 class Rack::AcornCache
   class CachedResponse
@@ -27,7 +27,7 @@ class Rack::AcornCache
     end
 
     def update_date
-      headers["Date"] = Time.now.utc.to_s
+      headers["Date"] = Time.now.httpdate
     end
 
     def to_json
