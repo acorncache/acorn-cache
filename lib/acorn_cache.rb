@@ -1,8 +1,8 @@
-require 'config'
-require 'redis_cache'
-require 'rack_response'
-require 'cached_response'
-require 'request'
+require 'acorn_cache/config'
+require 'acorn_cache/redis_cache'
+require 'acorn_cache/rack_response'
+require 'acorn_cache/cached_response'
+require 'acorn_cache/request'
 
 class Rack::AcornCache
   def initialize(app)
@@ -24,8 +24,9 @@ class Rack::AcornCache
 
     status, headers, body = @app.call(env)
     @rack_response = RackResponse.new(status, headers, body)
-    cache_rack_response_if_eligible
-    update_cached_response_date_if_eligible
+    CacheWriter.update_cache
+    # CacheUpdate.cache_rack_response
+    # CacheUpdate.update_cached_response_date
     rack_response.to_a
   end
 
@@ -50,7 +51,7 @@ class Rack::AcornCache
   end
 
   def cached_response
-    @cached_response ||= CachedResponse.new(cached_response_hash)
+    @cached_response ||= CachedResponse.new(CacheReader.cached_response_hash)
   end
 
   def cached_response?
