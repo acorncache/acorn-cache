@@ -3,6 +3,8 @@ require 'acorn_cache/redis_cache'
 require 'acorn_cache/rack_response'
 require 'acorn_cache/cached_response'
 require 'acorn_cache/request'
+require 'acorn_cache/cache_reader'
+require 'acorn_cache/cache_writer'
 
 class Rack::AcornCache
   def initialize(app)
