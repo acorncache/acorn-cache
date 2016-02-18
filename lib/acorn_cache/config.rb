@@ -1,27 +1,23 @@
 class Rack::AcornCache
   class Config
-
-    attr_reader :options
-
-    def initialize
-      @options = options_hash
-    end
-
     def paths_whitelist
-      options ? options["paths_whitelist"] : []
+      options["paths_whitelist"] ? options["paths_whitelist"] : []
     end
 
     def root_directory
       Rack::Directory.new("").root
     end
 
+    def options
+      @options ||= YAML.load(config_yml) || {}
+    end
+
     private
 
-    def options_hash
+    def config_yml
       config_path = root_directory + "/.acorncache.yml"
-      return unless File.exist?(config_path)
-      config_yml = File.read(config_path)
-      YAML.load(config_yml)
+      return "" unless File.exist?(config_path)
+      File.read(config_path)
     end
   end
 end

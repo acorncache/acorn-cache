@@ -45,12 +45,32 @@ class Rack::AcornCache
 
     def expiration_date(request)
       if max_age_specified?
-        header_value_to_time("Date") + more_restrictive_max_age(request)
-      elsif headers["Expiration"]
-        header_value_to_time("Expiration")
+        date_header_time + more_restrictive_max_age(request)
+      elsif expiration_header && request.max_age_specified?
+        more_restrictive_of_expiration_and_request_max_age(request)
+      elsif expiration_header
+        expiration_header
+      elsif request.max_age_specified?
+        date_header_time + request.max_age
       else
-        header_value_to_time("Date") + DEFAULT_MAX_AGE
+        date_header_time + DEFAULT_MAX_AGE
       end
+    end
+
+    def more_restrictive_of_expiration_and_request_max_age(request)
+      if (date_header_time + request.max_age) < expiration_header
+        date_header_time + request.max_age
+      else
+        expiration_header
+      end
+    end
+
+    def date_header_time
+      @date_header_time ||= header_value_to_time("Date")
+    end
+
+    def expiration_header
+      @expiration_header ||= headers["Expiration"]
     end
 
     def more_restrictive_max_age(request)

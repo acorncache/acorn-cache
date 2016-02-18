@@ -10,8 +10,6 @@ class Rack::AcornCache
       cache_control_header && cache_control_header.include?("max-age")
     end
 
-    private
-
     def caching_restrictions?
       cache_control_header &&
         CACHE_CONTROL_RESTRICTIONS.any? do |restriction|
