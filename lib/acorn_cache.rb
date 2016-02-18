@@ -44,7 +44,8 @@ class Rack::AcornCache
   end
 
   def cached_response?
-    return false unless CacheReader.new(request.path).hit?
+    @cache_reader = CacheReader.new(request.path)
+    return false unless cache_reader.hit?
     @cached_response = CachedResponse.new(cache_reader.cached_response_hash)
   end
 end
