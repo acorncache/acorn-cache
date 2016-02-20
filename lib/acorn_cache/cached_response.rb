@@ -1,7 +1,8 @@
 class Rack::AcornCache
   class CachedResponse
     extend Forwardable
-    def_delegators :@cache_control_header, :s_maxage, :max_age
+    def_delegators :@cache_control_header, :s_maxage, :max_age, :no_cache,
+                   :must_revalidate
 
     attr_reader :body, :status, :headers
     DEFAULT_MAX_AGE = 3600
@@ -30,7 +31,9 @@ class Rack::AcornCache
     end
 
     def add_x_from_acorn_cache_header!
-      headers["X-From-Acorn-Cache"] = "true"
+      unless headers["X-From-Acorn-Cache"]
+        headers["X-From-Acorn-Cache"] = "HIT"
+      end
     end
 
     def update_date!
@@ -55,6 +58,14 @@ class Rack::AcornCache
 
     def expiration_header
       @expiration_header ||= headers["Expiration"]
+    end
+
+    def etag_header
+      headers["ETag"]
+    end
+
+    def last_modified_header
+      headers["Last-Modified"]
     end
 
     def expiration

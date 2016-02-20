@@ -11,5 +11,13 @@ class Rack::AcornCache
       super
       @cache_control_header = CacheControlHeader.new(@env["HTTP_CACHE_CONTROL"])
     end
+
+    def if_none_match=(etag)
+      env["HTTP_IF_NONE_MATCH"] = etag
+    end
+
+    def if_modified_since=(last_modified)
+      env["HTTP_IF_MODIFIED_SINCE"] = last_modified
+    end
   end
 end

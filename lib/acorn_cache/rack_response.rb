@@ -1,26 +1,28 @@
+require 'acorn_cache/cache_control_header'
+
 class Rack::AcornCache
   class RackResponse < Rack::Response
+    extend Forwardable
+    def_delegators :@cache_control_header, :private, :no_store
     attr_reader :status, :headers, :body
 
     def initialize(status, headers, body)
       @status = status
       @headers = headers
       @body = body
-    end
-
-    def cache_control_header
-      headers["Cache-Control"]
+      @cache_control_header = CacheControlHeader.new(headers["Cache-Control"])
     end
 
     def update_date!
-      @headers["Date"] = Time.now.httpdate
+      @headers["Date"] = Time.now.httpdate unless @headers["Date"]
     end
 
     def cacheable?
-      !@no_cache && status == 200
+      [:private, :no_store].none? { |directive| send(directive) } &&
+        status == 200
     end
 
-    def date_updateable?
+    def not_changed?
       status == 304
     end
 
