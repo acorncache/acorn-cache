@@ -15,11 +15,12 @@ class Rack::AcornCache
 
   def call(env)
     request = Request.new(env)
+    return @app.call(env) unless request.get?
     cached_response = CacheReader.read(request.path)
 
     hit_server = Proc.new { @app.call(env) }
     response =
-      CacheController.new(request, cached_response, @config, &hit_server).run
+      CacheController.new(request, cached_response, @config, &hit_server).response
 
     if response.cacheable?
       CacheWriter.write(request.path, response.serialize)

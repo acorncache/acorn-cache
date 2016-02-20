@@ -2,11 +2,10 @@ class Rack::AcornCache
   class RackResponse < Rack::Response
     attr_reader :status, :headers, :body
 
-    def initialize(status, headers, body, no_cache: false)
+    def initialize(status, headers, body)
       @status = status
       @headers = headers
       @body = body
-      @no_cache = no_cache
     end
 
     def cache_control_header

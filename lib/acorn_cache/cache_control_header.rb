@@ -9,8 +9,8 @@ class Rack::AcornCache
       header_hash["max-age"]
     end
 
-    def s_max_age
-      header_hash["s-max-age"]
+    def s_maxage
+      header_hash["s-maxage"]
     end
 
     def no_cache
@@ -47,7 +47,7 @@ class Rack::AcornCache
 
     def to_h
       return {} unless @header_string
-      @header_string.split(";").each_with_object({}) do |directive, result|
+      @header_string.split(",").each_with_object({}) do |directive, result|
         k, v = directive.split("=")
         v = v.to_i if v =~ /^[0-9]+$/
         v = true if v.nil?

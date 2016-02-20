@@ -1,15 +1,32 @@
 class Rack::AcornCache
   class CachedResponse
+    extend Forwardable
+    def_delegators :@cache_control_header, :s_maxage, :max_age
+
     attr_reader :body, :status, :headers
+    DEFAULT_MAX_AGE = 3600
 
     def initialize(args={})
       @body = args["body"]
       @status = args["status"]
       @headers = args["headers"]
+      @cache_control_header = CacheControlHeader.new(headers["Cache-Control"])
     end
 
-    def cache_control_header
-      headers["Cache-Control"]
+    def fresh?
+      expiration_date > Time.now
+    end
+
+    def expiration_date
+      if s_maxage
+        date + s_maxage
+      elsif max_age
+        date + max_age
+      elsif expiration_header
+        expiration
+      else
+        date + DEFAULT_MAX_AGE
+      end
     end
 
     def add_x_from_acorn_cache_header!
@@ -32,8 +49,16 @@ class Rack::AcornCache
       @date_header_time ||= headers["Date"]
     end
 
+    def date
+      Time.httpdate(date_header)
+    end
+
     def expiration_header
       @expiration_header ||= headers["Expiration"]
+    end
+
+    def expiration
+      Time.httptime(expiration_header)
     end
 
     def cacheable?
