@@ -14,12 +14,10 @@ class Rack::AcornCache
 
     def add_x_from_acorn_cache_header!
       headers["X-From-Acorn-Cache"] = "true"
-      self
     end
 
     def update_date!
       headers["Date"] = Time.now.httpdate
-      self
     end
 
     def serialize

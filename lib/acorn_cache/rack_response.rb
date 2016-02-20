@@ -2,10 +2,11 @@ class Rack::AcornCache
   class RackResponse < Rack::Response
     attr_reader :status, :headers, :body
 
-    def initialize(status, headers, body)
+    def initialize(status, headers, body, no_cache: false)
       @status = status
       @headers = headers
       @body = body
+      @no_cache = no_cache
     end
 
     def cache_control_header
@@ -14,11 +15,10 @@ class Rack::AcornCache
 
     def update_date!
       @headers["Date"] = Time.now.httpdate
-      self
     end
 
-    def cacheable?(no_cache: false)
-      !no_cache && status == 200
+    def cacheable?
+      !@no_cache && status == 200
     end
 
     def date_updateable?

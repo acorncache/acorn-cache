@@ -5,10 +5,6 @@ class Rack::AcornCache
       @header_hash = to_h
     end
 
-    def present?
-      !!@header_string
-    end
-
     def max_age
       header_hash["max-age"]
     end
@@ -47,7 +43,10 @@ class Rack::AcornCache
 
     private
 
+    attr_reader :header_hash
+
     def to_h
+      return {} unless @header_string
       @header_string.split(";").each_with_object({}) do |directive, result|
         k, v = directive.split("=")
         v = v.to_i if v =~ /^[0-9]+$/

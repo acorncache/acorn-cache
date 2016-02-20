@@ -14,17 +14,18 @@ class Rack::AcornCache
   end
 
   def call(env)
-    @request = Request.new(env)
+    request = Request.new(env)
     cached_response = CacheReader.read(request.path)
 
     hit_server = Proc.new { @app.call(env) }
     response =
-      CacheController.new(request, cached_response, config, &hit_server).run
+      CacheController.new(request, cached_response, @config, &hit_server).run
 
     if response.cacheable?
       CacheWriter.write(request.path, response.serialize)
     elsif response.date_updateable?
-      CacheWriter.write(request.path, cached_response.update_date!.serialize)
+      cached_response.update_date!
+      CacheWriter.write(request.path, cached_response.update_date.serialize)
     end
 
     response.to_a
