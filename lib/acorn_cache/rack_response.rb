@@ -1,9 +1,5 @@
-require 'acorn_cache/cache_control_restrictable'
-
 class Rack::AcornCache
   class RackResponse < Rack::Response
-    include CacheControlRestrictable
-
     attr_reader :status, :headers, :body
 
     def initialize(status, headers, body)
@@ -16,19 +12,20 @@ class Rack::AcornCache
       headers["Cache-Control"]
     end
 
-    def add_date_header
+    def update_date!
       @headers["Date"] = Time.now.httpdate
+      self
     end
 
-    def eligible_for_caching?
-      status == 200 && !caching_restrictions?
+    def cacheable?(no_cache: false)
+      !no_cache && status == 200
     end
 
-    def eligible_for_updating?
+    def date_updateable?
       status == 304
     end
 
-    def to_json
+    def serialize
       { status: status, headers: headers, body: body_string }.to_json
     end
 
@@ -41,9 +38,5 @@ class Rack::AcornCache
     def to_a
       [status, headers, body]
     end
-
-    private
-
-    attr_reader :headers
   end
 end
