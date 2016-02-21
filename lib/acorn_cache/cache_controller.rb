@@ -1,22 +1,21 @@
 require 'acorn_cache/cache_control_header'
 require 'acorn_cache/cache_reader'
 require 'acorn_cache/cache_writer'
+require 'acorn_cahce/config'
 
 class Rack::AcornCache
   class CacheController
-    def initialize(request, config, app)
+    def initialize(request, app)
       @request = request
-      @config = config
       @app = app
     end
 
     def response
-      if request_requires_server_response? ||
-          !cached_response_directly_returnable_for_request?
-        get_repsonse_from_server
+      if request.no_cache || !cached_response_directly_returnable_for_request?
+        get_response_from_server
         update_cache_if_needed
         rack_response
-      elsif cached_repsonse.must_be_revalidated?
+      elsif cached_response_must_be_revalidated?
         add_cached_response_etag_to_request
         add_cached_response_last_modified_to_request
         get_response_from_server
@@ -39,7 +38,7 @@ class Rack::AcornCache
 
     private
 
-    attr_reader :request, :cached_response, :config, :hit_server,
+    attr_reader :request, :cached_response, :hit_server,
                 :rack_response, :app
 
     def get_response_from_server
@@ -59,9 +58,6 @@ class Rack::AcornCache
       end
     end
 
-    def rack_response
-    end
-
     def update_cache_if_needed
       if rack_response.cacheable?
         rack_response.update_date!
@@ -76,13 +72,8 @@ class Rack::AcornCache
       @cached_response ||= CacheReader.read(request.path)
     end
 
-    def request_requires_server_response?
-      !@config.paths_whitelist.include?(request.path) || request.no_cache
-    end
-
     def cached_response_must_be_revalidated?
-      cached_response &&
-        (cached_repsonse.no_cache || cached_response.must_revalidate)
+      (cached_response.no_cache || cached_response.must_revalidate)
     end
 
     def cached_response_directly_returnable_for_request?
