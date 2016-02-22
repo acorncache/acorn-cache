@@ -37,7 +37,7 @@ class Rack::AcornCache
       header_hash["max-stale"]
     end
 
-    alias_method :max_stale, :max_stale?
+    alias_method :max_stale?, :max_stale
 
     def directives
       header_hash.keys

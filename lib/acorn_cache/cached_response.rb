@@ -51,12 +51,6 @@ class Rack::AcornCache
       end
     end
 
-    def add_x_from_acorn_cache_header!
-      unless headers["X-From-Acorn-Cache"]
-        headers["X-From-Acorn-Cache"] = "HIT"
-      end
-    end
-
     def update_date!
       headers["Date"] = Time.now.httpdate
     end
@@ -93,9 +87,16 @@ class Rack::AcornCache
       Time.httptime(expiration_header)
     end
 
-    def update!
+    def update!(request_path)
       cached_response.update_date!
       CacheWriter.write(request_path, cached_response.serialize)
+      self
+    end
+
+    def add_acorn_cache_header!
+      unless headers["X-Acorn-Cache"]
+        headers["X-Acorn-Cache"] = "HIT"
+      end
       self
     end
 
