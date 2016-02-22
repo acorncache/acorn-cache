@@ -1,5 +1,5 @@
 class Rack::AcornCache
-  class RequestValidator
+  class Validator
     def initialize(request, app, cached_response)
       @request = request
       @app = app

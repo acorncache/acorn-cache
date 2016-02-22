@@ -13,19 +13,19 @@ class Rack::AcornCache
       header_hash["s-maxage"]
     end
 
-    def no_cache
+    def no_cache?
       header_hash["no-cache"]
     end
 
-    def no_store
+    def no_store?
       header_hash["no-store"]
     end
 
-    def must_revalidate
+    def must_revalidate?
       header_hash["must-revalidate"]
     end
 
-    def private
+    def private?
       header_hash["private"]
     end
 
@@ -36,6 +36,8 @@ class Rack::AcornCache
     def max_stale
       header_hash["max-stale"]
     end
+
+    alias_method :max_stale, :max_stale?
 
     def directives
       header_hash.keys

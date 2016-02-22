@@ -1,9 +1,10 @@
 require 'acorn_cache/cache_control_header'
+require 'acorn_cache/cache_writer'
 
 class Rack::AcornCache
-  class RackResponse < Rack::Response
+  class ServerResponse < Rack::Response
     extend Forwardable
-    def_delegators :@cache_control_header, :private, :no_store
+    def_delegators :@cache_control_header, :private?, :no_store?
     attr_reader :status, :headers, :body
 
     def initialize(status, headers, body)
@@ -18,11 +19,11 @@ class Rack::AcornCache
     end
 
     def cacheable?
-      [:private, :no_store].none? { |directive| send(directive) } &&
+      [:private?, :no_store?].none? { |directive| send(directive) } &&
         status == 200
     end
 
-    def not_changed?
+    def status_304?
       status == 304
     end
 
@@ -38,6 +39,13 @@ class Rack::AcornCache
 
     def to_a
       [status, headers, body]
+    end
+
+    def cache!
+      update_date!
+      add_x_from_acorn_cache_header!
+      CacheWriter.write(request_path, serialize)
+      self
     end
   end
 end

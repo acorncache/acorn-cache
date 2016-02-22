@@ -1,8 +1,11 @@
+require 'acorn_cache/cache_control_header'
+require 'acorn_cache/cache_writer'
+
 class Rack::AcornCache
   class CachedResponse
     extend Forwardable
-    def_delegators :@cache_control_header, :s_maxage, :max_age, :no_cache,
-                   :must_revalidate
+    def_delegators :@cache_control_header, :s_maxage, :max_age, :no_cache?,
+                   :must_revalidate?
 
     attr_reader :body, :status, :headers
     DEFAULT_MAX_AGE = 3600
@@ -16,6 +19,24 @@ class Rack::AcornCache
 
     def fresh?
       expiration_date > Time.now
+    end
+
+    def must_be_revalidated?
+      no_cache? || must_revalidate?
+    end
+
+    def fresh_for?(request)
+      if fresh?
+        return date + request.max_age >= Time.now if request.max_age
+        if request.max_fresh
+          return expiration_date - request.max_fresh >= Time.now
+        end
+        true
+      else
+        return false unless request.max_stale
+        return true if request.max_stale == true
+        cached_response.expiration_date + request.max_stale >= Time.now
+      end
     end
 
     def expiration_date
@@ -72,12 +93,37 @@ class Rack::AcornCache
       Time.httptime(expiration_header)
     end
 
-    def cacheable?
+    def update!
+      cached_response.update_date!
+      CacheWriter.write(request_path, cached_response.serialize)
+      self
+    end
+
+    def matches?(server_response)
+      if etag_header
+        server_response.etag_header == etag_header
+      elsif last_modified_header
+        server_repsonse.last_modified_header == last_modified_header
+      else
+        false
+      end
+    end
+  end
+
+  class NullCachedResponse
+    def fresh_for?(request)
       false
     end
 
-    def date_updateable?
+    def must_be_revalidated?
       false
+    end
+
+    def matches?(server_response)
+      false
+    end
+
+    def update!
     end
   end
 end

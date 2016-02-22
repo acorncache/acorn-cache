@@ -12,12 +12,27 @@ class Rack::AcornCache
       @cache_control_header = CacheControlHeader.new(@env["HTTP_CACHE_CONTROL"])
     end
 
+    def update_conditional_headers!(cached_response)
+      if cached_response.etag_header
+        self.if_none_match = cached_response.etag_header
+      end
+
+      if cached_response.last_modified_header
+        self.if_modified_since = cached_response.last_modified_header
+      end
+    end
+
+    private
+
     def if_none_match=(etag)
       env["HTTP_IF_NONE_MATCH"] = etag
     end
 
     def if_modified_since=(last_modified)
       env["HTTP_IF_MODIFIED_SINCE"] = last_modified
+    end
+
+    def add_cached_response_last_modified_to_request
     end
   end
 end
