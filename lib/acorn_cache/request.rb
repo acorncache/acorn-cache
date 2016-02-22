@@ -31,8 +31,5 @@ class Rack::AcornCache
     def if_modified_since=(last_modified)
       env["HTTP_IF_MODIFIED_SINCE"] = last_modified
     end
-
-    def add_cached_response_last_modified_to_request
-    end
   end
 end

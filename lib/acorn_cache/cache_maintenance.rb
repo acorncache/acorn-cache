@@ -1,6 +1,6 @@
 class Rack::AcornCache
   module CacheMaintenance
-    def update_cache_with(request_path, server_response, cached_response)
+    def self.update_cache_with(request_path, server_response, cached_response)
       return cached_response unless server_response
       return server_response unless server_response.cacheable? ||
                                     server_response.status_304?

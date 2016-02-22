@@ -1,3 +1,6 @@
+require 'acorn_cache/cached_response'
+require 'acorn_cache/redis_cache'
+
 class Rack::AcornCache
   module CacheReader
     def self.read(request_path)
