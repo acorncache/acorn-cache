@@ -33,10 +33,7 @@ TODO: Add installation instructions for other platforms here.
 
 ## Further Information
 
-AcornCache's rules and caching guidelines strictly follow HTTP 1.1 protocols and RFC 2616 standards.  [The following flow chart](http://imgur.com/o63TJAa) details the logic and rules that AcornCache is built on.
-
-![AcornCache rules flow chart](http://imgur.com/o63TJAa)
-
+AcornCache's rules and caching guidelines strictly follow HTTP 1.1 protocols and RFC 2616 standards.  [This flow chart](http://imgur.com/o63TJAa) details the logic and rules that AcornCache is built upon.
 
 ## Contributing
 
