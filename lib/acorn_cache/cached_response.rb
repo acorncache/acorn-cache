@@ -87,7 +87,7 @@ class Rack::AcornCache
       Time.httptime(expiration_header)
     end
 
-    def update!(request_path)
+    def update_date_and_recache!(request_path)
       cached_response.update_date!
       CacheWriter.write(request_path, cached_response.serialize)
       self
