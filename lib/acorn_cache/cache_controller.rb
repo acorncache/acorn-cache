@@ -24,16 +24,15 @@ class Rack::AcornCache
         end
       end
 
-      perform_cache_maintenance(request.path, server_response, cached_response)
+      CacheMaintenance
+        .new(request.path, server_response, cached_response)
+        .update_cache
+        .response
     end
 
     private
 
     attr_reader :request, :app
-
-    def perform_cache_maintenance(path, server_response, cached_response)
-      CacheMaintenance.update_cache_with(path, server_response, cached_response)
-    end
 
     def get_response_from_server
       status, headers, body = @app.call(request.env)
