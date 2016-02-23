@@ -32,5 +32,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "factory_girl"
   spec.add_development_dependency "pry"
+  spec.add_development_dependency "mocha"
   spec.add_runtime_dependency "rack", "~> 1.6"
 end
