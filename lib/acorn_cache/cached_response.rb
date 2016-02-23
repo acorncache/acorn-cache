@@ -1,5 +1,6 @@
 require 'acorn_cache/cache_control_header'
 require 'acorn_cache/cache_writer'
+require 'forwardable'
 
 class Rack::AcornCache
   class CachedResponse
@@ -33,7 +34,7 @@ class Rack::AcornCache
         end
         true
       else
-        return false unless request.max_stale
+        return false unless request.max_stale?
         return true if request.max_stale == true
         cached_response.expiration_date + request.max_stale >= Time.now
       end

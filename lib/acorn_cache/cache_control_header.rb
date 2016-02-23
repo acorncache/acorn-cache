@@ -1,3 +1,5 @@
+require 'rack'
+
 class Rack::AcornCache
   class CacheControlHeader
     def initialize(header_string)
@@ -39,22 +41,26 @@ class Rack::AcornCache
 
     alias_method :max_stale?, :max_stale
 
-    def directives
-      header_hash.keys
-    end
-
     private
 
     attr_reader :header_hash
 
     def to_h
       return {} unless @header_string
-      @header_string.split(",").each_with_object({}) do |directive, result|
-        k, v = directive.split("=")
-        v = v.to_i if v =~ /^[0-9]+$/
-        v = true if v.nil?
-        result[k] = v
-      end
+      @header_string
+        .gsub(/\s+/, "").split(",").each_with_object({}) do |directive, result|
+          k, v = directive.split("=")
+
+          if v =~ /^[0-9]+$/
+            v = v.to_i
+          elsif v.nil?
+            v = true
+          else
+            v = nil
+          end
+
+          result[k] = v
+        end
     end
   end
 end
