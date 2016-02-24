@@ -1,5 +1,4 @@
 require 'minitest/autorun'
-require 'minitest/mock'
 require 'acorn_cache/cache_reader'
 require 'mocha/mini_test'
 

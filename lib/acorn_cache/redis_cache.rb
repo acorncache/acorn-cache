@@ -1,3 +1,5 @@
+require 'redis'
+
 class Rack::AcornCache
   module RedisCache
     def self.redis

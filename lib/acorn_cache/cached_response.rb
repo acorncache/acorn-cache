@@ -66,6 +66,7 @@ class Rack::AcornCache
 
     def date_header
       @date_header_time ||= headers["Date"]
+      require 'pry'; binding.pry
     end
 
     def date
