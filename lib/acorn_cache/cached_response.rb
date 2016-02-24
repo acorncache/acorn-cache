@@ -5,10 +5,9 @@ require 'forwardable'
 class Rack::AcornCache
   class CachedResponse
     extend Forwardable
-    def_delegators :@cache_control_header, :s_maxage, :max_age, :no_cache?,
-                   :must_revalidate?
+    def_delegators :@cache_control_header, :s_maxage, :max_age, :no_cache?, :must_revalidate?
 
-    attr_reader :body, :status, :headers
+    attr_reader :body, :status, :headers, :date
     DEFAULT_MAX_AGE = 3600
 
     def initialize(args={})
@@ -65,12 +64,11 @@ class Rack::AcornCache
     end
 
     def date_header
-      @date_header_time ||= headers["Date"]
-      require 'pry'; binding.pry
+      headers["Date"]
     end
 
     def date
-      Time.httpdate(date_header)
+      @date ||= Time.httpdate(date_header)
     end
 
     def expiration_header
@@ -86,7 +84,7 @@ class Rack::AcornCache
     end
 
     def expiration
-      Time.httptime(expiration_header)
+      Time.httpdate(expiration_header)
     end
 
     def update_date_and_recache!(request_path)
@@ -106,7 +104,7 @@ class Rack::AcornCache
       if etag_header
         server_response.etag_header == etag_header
       elsif last_modified_header
-        server_repsonse.last_modified_header == last_modified_header
+        server_response.last_modified_header == last_modified_header
       else
         false
       end
