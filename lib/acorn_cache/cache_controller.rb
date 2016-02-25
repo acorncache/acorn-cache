@@ -13,6 +13,7 @@ class Rack::AcornCache
     def response
       if request.no_cache?
         server_response = get_response_from_server
+        cached_response = NullCachedResponse.new
       else
         cached_response = check_for_cached_response
 

@@ -17,18 +17,15 @@ class Rack::AcornCache
       @cache_control_header = CacheControlHeader.new(headers["Cache-Control"])
     end
 
-    def fresh?
-      expiration_date > Time.now
-    end
-
     def must_be_revalidated?
       no_cache? || must_revalidate?
     end
 
     def fresh_for?(request)
       if fresh?
-        return date + request.max_age >= Time.now if request.max_age
-        if request.max_fresh
+        if request.max_age_more_restrictive?(self)
+          return date + request.max_age >= Time.now
+        elsif request.max_fresh
           return expiration_date - request.max_fresh >= Time.now
         end
         true
@@ -36,18 +33,6 @@ class Rack::AcornCache
         return false unless request.max_stale?
         return true if request.max_stale == true
         cached_response.expiration_date + request.max_stale >= Time.now
-      end
-    end
-
-    def expiration_date
-      if s_maxage
-        date + s_maxage
-      elsif max_age
-        date + max_age
-      elsif expiration_header
-        expiration
-      else
-        date + DEFAULT_MAX_AGE
       end
     end
 
@@ -63,28 +48,12 @@ class Rack::AcornCache
       [status, headers, [body]]
     end
 
-    def date_header
-      headers["Date"]
-    end
-
-    def date
-      @date ||= Time.httpdate(date_header)
-    end
-
-    def expiration_header
-      @expiration_header ||= headers["Expiration"]
-    end
-
     def etag_header
       headers["ETag"]
     end
 
     def last_modified_header
       headers["Last-Modified"]
-    end
-
-    def expiration
-      Time.httpdate(expiration_header)
     end
 
     def update_date_and_recache!(request_path)
@@ -108,6 +77,50 @@ class Rack::AcornCache
       else
         false
       end
+    end
+
+    def time_until_stale
+      s_maxage || maxage || expiration_header
+    end
+
+    alias_method :stale_time_specified?, :time_until_stale
+
+    private
+
+    def fresh?
+      expiration_date > Time.now
+    end
+
+    def expiration_header_time
+      Time.httpdate(expiration_header)
+    end
+
+    def expiration_header
+      @expiration_header ||= headers["Expiration"]
+    end
+
+    def date
+      @date ||= Time.httpdate(date_header)
+    end
+
+    def date_header
+      headers["Date"]
+    end
+
+    def expiration_date
+      if s_maxage
+        date + s_maxage
+      elsif max_age
+        date + max_age
+      elsif expiration_header
+        expiration
+      else
+        date + DEFAULT_MAX_AGE
+      end
+    end
+
+    def time_until_expiration
+      Time.now - expiration
     end
   end
 
