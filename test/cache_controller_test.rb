@@ -22,12 +22,13 @@ class CacheControllerTest < MiniTest::Test
   def test_response_when_request_no_cache_false_and_theres_no_cached_version
     request = stub(no_cache?: false, path: "/", env: {})
     server_response = mock('server_response')
-    null_cached_response = stub(must_be_revalidated?: false, fresh_for?: false)
+    null_cached_response = stub(must_be_revalidated?: false)
     app = stub(call: [200, {}, "foo"])
     cache_maintenance = mock('cache_maintenance')
 
     Rack::AcornCache::CacheReader.expects(:read).returns(nil)
     Rack::AcornCache::NullCachedResponse.expects(:new).returns(null_cached_response)
+    Rack::AcornCache::FreshnessRules.expects(:cached_response_fresh_for_request?).with(null_cached_response, request).returns(false)
 
     Rack::AcornCache::ServerResponse.expects(:new).with(200, {}, "foo").returns(server_response)
     Rack::AcornCache::CacheMaintenance.expects(:new).with("/", server_response, null_cached_response).returns(cache_maintenance)

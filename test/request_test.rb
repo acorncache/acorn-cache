@@ -65,4 +65,34 @@ class RequestTest < Minitest::Test
     refute request.env["HTTP_IF_NONE_MATCH"]
     refute request.env["HTTP_IF_MODIFIED_SINCE"]
   end
+
+  def test_max_age_more_restrictive_when_no_cached_response_stale_time_specified
+    cached_response = stub(stale_time_specified?: false)
+    request = Rack::AcornCache::Request.new({})
+
+    refute request.max_age_more_restrictive?(cached_response)
+  end
+
+  def test_max_age_more_restrictive_when_request_has_no_max_age
+    cached_response = stub(stale_time_specified?: true)
+    request = Rack::AcornCache::Request.new({})
+
+    refute request.max_age_more_restrictive?(cached_response)
+  end
+
+  def test_max_age_more_restrictive_when_max_age_greater_than_cached_response_time_until_stale
+    cached_response = stub(stale_time_specified?: true, time_until_stale: 30)
+    env = { "HTTP_CACHE_CONTROL" => "max-age=40" }
+    request = Rack::AcornCache::Request.new(env)
+
+    refute request.max_age_more_restrictive?(cached_response)
+  end
+
+  def test_max_age_more_restrictive_when_max_age_less_than_cached_response_time_until_stale
+    cached_response = stub(stale_time_specified?: true, time_until_stale: 30)
+    env = { "HTTP_CACHE_CONTROL" => "max-age=20" }
+    request = Rack::AcornCache::Request.new(env)
+
+    assert request.max_age_more_restrictive?(cached_response)
+  end
 end
