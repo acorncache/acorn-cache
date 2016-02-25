@@ -28,7 +28,6 @@ class ServerResponseTest < Minitest::Test
     server_response = Rack::AcornCache::ServerResponse.new(200, { "Cache-Control" => "private" }, "test body")
 
     assert server_response.private?
-
   end
 
   def test_no_store_delegation
@@ -79,5 +78,35 @@ class ServerResponseTest < Minitest::Test
     server_response = Rack::AcornCache::ServerResponse.new(304, { "Cache-Control" => "no-store" }, "test body")
 
     assert server_response.status_304?
+  end
+
+  def test_serialize
+    server_response = Rack::AcornCache::ServerResponse.new(304, { "Cache-Control" => "no-store" }, ["test body"])
+
+    result = server_response.serialize
+
+    assert_equal "{\"status\":304,\"headers\":{\"Cache-Control\":\"no-store\"},\"body\":\"test body\"}", result
+  end
+
+  def test_body_string
+    server_response = Rack::AcornCache::ServerResponse.new(304, { "Cache-Control" => "no-store" }, ["test body part one", "test body part deux"])
+
+    result = server_response.body_string
+
+    assert_equal "test body part onetest body part deux", result
+  end
+
+  def test_to_a
+    server_response = Rack::AcornCache::ServerResponse.new(304, { "Cache-Control" => "no-store" }, "test body")
+
+    result = server_response.to_a
+
+    assert_equal [304, {"Cache-Control"=>"no-store"}, "test body"], result
+  end
+
+  def test_cache!
+    server_response = Rack::AcornCache::ServerResponse.new(304, {"Cache-Control"=>"no-store"}, "test body")
+
+    assert server_response
   end
 end
