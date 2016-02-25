@@ -45,11 +45,9 @@ class CacheMaintenanceTest < MiniTest::Test
 
   def test_update_cache_with_server_response_cacheable
     request_path = "/foo"
-    server_response = mock('server_response')
+    server_response = stub(cacheable?: true, status_304?: false)
     cached_response = mock('cached_response')
 
-    server_response.stubs(:cacheable?).returns(true)
-    server_response.stubs(:status_304?).returns(false)
     server_response.expects(:cache!).with(request_path).returns(server_response)
 
     cache_maintenance =

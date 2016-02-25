@@ -23,6 +23,11 @@ class Rack::AcornCache
       end
     end
 
+    def max_age_more_restrictive?(cached_response)
+      cached_response.stale_time_specified? &&
+        max_age && max_age < cached_response.time_until_stale
+    end
+
     private
 
     def if_none_match=(etag)
