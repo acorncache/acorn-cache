@@ -20,7 +20,7 @@ class Rack::AcornCache
         if cached_response.must_be_revalidated?
           request.update_conditional_headers!(cached_response)
           server_response = get_response_from_server
-        elsif !cached_response.fresh_for?(request)
+        elsif FreshnessRules.cached_response_fresh_for_request?(cached_response, request)
           server_response = get_response_from_server
         end
       end

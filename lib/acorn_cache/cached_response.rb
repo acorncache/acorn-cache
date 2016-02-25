@@ -21,21 +21,6 @@ class Rack::AcornCache
       no_cache? || must_revalidate?
     end
 
-    def fresh_for?(request)
-      if fresh?
-        if request.max_age_more_restrictive?(self)
-          return date + request.max_age >= Time.now
-        elsif request.max_fresh
-          return expiration_date - request.max_fresh >= Time.now
-        end
-        true
-      else
-        return false unless request.max_stale?
-        return true if request.max_stale == true
-        cached_response.expiration_date + request.max_stale >= Time.now
-      end
-    end
-
     def update_date!
       headers["Date"] = Time.now.httpdate
     end
@@ -83,28 +68,12 @@ class Rack::AcornCache
       s_maxage || maxage || expiration_header
     end
 
-    alias_method :stale_time_specified?, :time_until_stale
-
-    private
-
     def fresh?
       expiration_date > Time.now
     end
 
-    def expiration_header_time
-      Time.httpdate(expiration_header)
-    end
-
-    def expiration_header
-      @expiration_header ||= headers["Expiration"]
-    end
-
     def date
       @date ||= Time.httpdate(date_header)
-    end
-
-    def date_header
-      headers["Date"]
     end
 
     def expiration_date
@@ -121,6 +90,22 @@ class Rack::AcornCache
 
     def time_until_expiration
       Time.now - expiration
+    end
+
+    alias_method :stale_time_specified?, :time_until_stale
+
+    private
+
+    def expiration_header_time
+      Time.httpdate(expiration_header)
+    end
+
+    def expiration_header
+      @expiration_header ||= headers["Expiration"]
+    end
+
+    def date_header
+      headers["Date"]
     end
   end
 
