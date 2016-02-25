@@ -1,4 +1,4 @@
 TODO:
-1) Test Response#max_age_more_restrictive?(cached_response)
+.1) Test Response#max_age_more_restrictive?(cached_response)
 2) Test all public CachedResponse methods
-3) Test FreshnessRules
+.3) Test FreshnessRules

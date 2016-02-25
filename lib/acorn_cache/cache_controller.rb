@@ -2,6 +2,7 @@ require 'acorn_cache/cache_reader'
 require 'acorn_cache/cache_maintenance'
 require 'acorn_cache/server_response'
 require 'acorn_cache/cached_response'
+require 'acorn_cache/freshness_rules'
 
 class Rack::AcornCache
   class CacheController
@@ -20,7 +21,7 @@ class Rack::AcornCache
         if cached_response.must_be_revalidated?
           request.update_conditional_headers!(cached_response)
           server_response = get_response_from_server
-        elsif FreshnessRules.cached_response_fresh_for_request?(cached_response, request)
+        elsif !FreshnessRules.cached_response_fresh_for_request?(cached_response, request)
           server_response = get_response_from_server
         end
       end

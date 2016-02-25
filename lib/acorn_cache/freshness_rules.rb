@@ -1,6 +1,7 @@
 class Rack::AcornCache
-  module FreshCheck
-    def cached_response_fresh_for_request?(cached_response, request)
+  module FreshnessRules
+    def self.cached_response_fresh_for_request?(cached_response, request)
+      return false unless cached_response.present?
       if cached_response.fresh?
         if request.max_age_more_restrictive?(cached_response)
           return cached_response.date + request.max_age >= Time.now

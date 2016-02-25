@@ -318,11 +318,10 @@ class CachedResponseTest < Minitest::Test
 end
 
 class NullCachedResponseTest < Minitest::Test
-  def test_fresh_for?
-    request = mock("request")
+  def test_present?
     null_cached_response = Rack::AcornCache::NullCachedResponse.new
 
-    refute null_cached_response.fresh_for?(request)
+    refute null_cached_response.present?
   end
 
   def test_must_be_revalidated?
