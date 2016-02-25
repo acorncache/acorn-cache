@@ -1,10 +1,13 @@
 require 'acorn_cache/cache_control_header'
 require 'acorn_cache/cache_writer'
+require 'forwardable'
 
 class Rack::AcornCache
   class ServerResponse < Rack::Response
     extend Forwardable
     def_delegators :@cache_control_header, :private?, :no_store?
+
+    attr_reader :status, :headers, :body
 
     def initialize(status, headers, body)
       @status = status
@@ -45,9 +48,5 @@ class Rack::AcornCache
       CacheWriter.write(request_path, serialize)
       self
     end
-
-    private
-
-    attr_reader :status, :headers, :body
   end
 end

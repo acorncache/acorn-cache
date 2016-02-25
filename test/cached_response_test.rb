@@ -11,6 +11,7 @@ class CachedResponseTest < Minitest::Test
     Rack::AcornCache::CacheControlHeader.expects(:new).with("private")
 
     cached_response = Rack::AcornCache::CachedResponse.new(args)
+
     assert_equal 200, cached_response.status
     assert_equal({ "Cache-Control" => "private" },  cached_response.headers)
     assert_equal "test body", cached_response.body

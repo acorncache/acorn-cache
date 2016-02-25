@@ -1,0 +1,83 @@
+require 'minitest/autorun'
+require 'acorn_cache/server_response'
+require 'mocha/mini_test'
+
+class ServerResponseTest < Minitest::Test
+
+  attr_reader :status, :headers, :body
+
+  def test_new
+    @status = status
+    @headers = headers
+    @body = body
+
+    Rack::AcornCache::CacheControlHeader.expects(:new).with("private")
+
+    server_response = Rack::AcornCache::ServerResponse.new(200, { "Cache-Control" => "private" }, "test body")
+
+    assert_equal 200, server_response.status
+    assert_equal({ "Cache-Control" => "private" },  server_response.headers)
+    assert_equal "test body", server_response.body
+  end
+
+  def test_private_delegation
+    cache_control_header = mock("cache control header")
+    cache_control_header.expects(:private?).returns(true)
+    Rack::AcornCache::CacheControlHeader.expects(:new).returns(cache_control_header)
+
+    server_response = Rack::AcornCache::ServerResponse.new(200, { "Cache-Control" => "private" }, "test body")
+
+    assert server_response.private?
+
+  end
+
+  def test_no_store_delegation
+    cache_control_header = mock("cache control header")
+    cache_control_header.expects(:no_store?).returns(true)
+    Rack::AcornCache::CacheControlHeader.expects(:new).returns(cache_control_header)
+
+    server_response = Rack::AcornCache::ServerResponse.new(200, { "Cache-Control" => "no-store" }, "test body")
+
+    assert server_response.no_store?
+  end
+
+  def test_update_date_when_date_already_exists
+    server_response = Rack::AcornCache::ServerResponse.new(200, { "Date" => "Mon, 01 Jan 2000 01:00:01 GMT" }, "test body")
+
+    assert "Mon, 01 Jan 2000 01:00:01 GMT", server_response.update_date!
+  end
+
+  def test_update_when_no_date_exists
+    server_response = Rack::AcornCache::ServerResponse.new(200, { "Cache-Control" => "no-store" }, "test body")
+
+    current_time = mock("current time")
+    current_time.expects(:httpdate).returns(Time.now.httpdate)
+
+    server_response.update_date!
+    assert_equal current_time.httpdate, server_response.headers["Date"]
+  end
+
+  def test_cacheable_returns_true
+    server_response = Rack::AcornCache::ServerResponse.new(200, { }, "test body")
+
+    assert server_response.cacheable?
+  end
+
+  def test_cacheable_returns_false_for_cache_control
+    server_response = Rack::AcornCache::ServerResponse.new(200, { "Cache-Control" => "no-store" }, "test body")
+
+    refute server_response.cacheable?
+  end
+
+  def test_cacheable_returns_false_for_status
+    server_response = Rack::AcornCache::ServerResponse.new(304, { }, "test body")
+
+    refute server_response.cacheable?
+  end
+
+  def test_status_304?
+    server_response = Rack::AcornCache::ServerResponse.new(304, { "Cache-Control" => "no-store" }, "test body")
+
+    assert server_response.status_304?
+  end
+end
