@@ -65,7 +65,7 @@ class Rack::AcornCache
     end
 
     def time_until_stale
-      s_maxage || maxage || expiration_header
+      s_maxage || max_age || expiration_header_time
     end
 
     def fresh?
@@ -88,10 +88,6 @@ class Rack::AcornCache
       end
     end
 
-    def time_until_expiration
-      Time.now - expiration
-    end
-
     alias_method :stale_time_specified?, :time_until_stale
 
     private
@@ -102,6 +98,10 @@ class Rack::AcornCache
 
     def expiration_header
       @expiration_header ||= headers["Expiration"]
+    end
+
+    def expiration
+      @expiration ||= Time.httpdate(expiration_header)
     end
 
     def date_header

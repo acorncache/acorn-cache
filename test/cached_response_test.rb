@@ -17,19 +17,6 @@ class CachedResponseTest < Minitest::Test
     assert_equal "test body", cached_response.body
   end
 
-  #TODO: test more extensively, don't mock out expiration_date
-  def test_fresh?
-    args = { "status" => 200,
-             "headers" =>  { "Cache-Control" => "no-cache" },
-             "body" => "test body" }
-
-    expiration_date = Time.new(2002)
-    cached_response = Rack::AcornCache::CachedResponse.new(args)
-    cached_response.expects(:expiration_date).returns(expiration_date)
-
-    refute cached_response.fresh?
-  end
-
   def test_no_cache_delegation
     args = { "status" => 200,
              "headers" =>  { "Cache-Control" => "no-cache" },
@@ -93,52 +80,6 @@ class CachedResponseTest < Minitest::Test
     assert cached_response.must_be_revalidated?
   end
 
-  def test_fresh_for_when_cached_response_fresh_because_of_s_maxage?
-  end
-
-  # def test_expiration_date_if_s_maxage
-  #   args = { "status" => 200,
-  #            "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT", "Cache-Control" => "s-maxage=30" },
-  #            "body" => "test body" }
-
-  #   cached_response = Rack::AcornCache::CachedResponse.new(args)
-  #   result = cached_response.expiration_date
-
-  #   assert_equal Time.httpdate("Mon, 01 Jan 2000 00:00:31 GMT"), result
-  # end
-
-  # def test_expiration_date_if_maxage
-  #   args = { "status" => 200,
-  #            "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT", "Cache-Control" => "max-age=30" },
-  #            "body" => "test body" }
-
-  #   cached_response = Rack::AcornCache::CachedResponse.new(args)
-  #   result = cached_response.expiration_date
-
-  #   assert_equal Time.httpdate("Mon, 01 Jan 2000 00:00:31 GMT"), result
-  # end
-
-  # def test_expiration_date_if_expiration_header
-  #   args = { "status" => 200,
-  #            "headers" =>  { "Expiration" => "Mon, 01 Jan 2000 00:00:01 GMT" },           "body" => "test body" }
-
-  #   cached_response = Rack::AcornCache::CachedResponse.new(args)
-  #   result = cached_response.expiration_date
-
-  #   assert_equal Time.httpdate("Mon, 01 Jan 2000 00:00:01 GMT"), result
-  # end
-
-  # def test_expiration_date_for_default_max_age
-  #   args = { "status" => 200,
-  #            "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT" },
-  #            "body" => "test body" }
-
-  #   cached_response = Rack::AcornCache::CachedResponse.new(args)
-  #   result = cached_response.expiration_date
-
-  #   assert_equal Time.httpdate("Mon, 01 Jan 2000 01:00:01 GMT"), result
-  # end
-
   def test_update_date!
     args = { "status" => 200,
              "headers" =>  { "Cache-Control" => "no-cache" },
@@ -174,38 +115,6 @@ class CachedResponseTest < Minitest::Test
     assert_equal [200, {"Cache-Control"=>"no-cache"}, ["test body"]], result
   end
 
-  # def test_date_header
-  #   args = { "status" => 200,
-  #            "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT" },
-  #            "body" => "test body" }
-
-  #   cached_response = Rack::AcornCache::CachedResponse.new(args)
-
-  #   assert_equal "Mon, 01 Jan 2000 00:00:01 GMT", cached_response.date_header
-  # end
-
-  # def test_date
-  #   args = { "status" => 200,
-  #            "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT" },
-  #            "body" => "test body" }
-
-  #   cached_response = Rack::AcornCache::CachedResponse.new(args)
-  #   result = cached_response.date
-
-  #   assert_equal Time.httpdate("Mon, 01 Jan 2000 00:00:01 GMT"), result
-  # end
-
-  # def test_expiration_header
-  #   args = { "status" => 200,
-  #            "headers" =>  { "Expiration" => "Mon, 01 Jan 2000 00:00:01 GMT" },
-  #            "body" => "test body" }
-
-  #   cached_response = Rack::AcornCache::CachedResponse.new(args)
-  #   result = cached_response.expiration_header
-
-  #   assert_equal "Mon, 01 Jan 2000 00:00:01 GMT", result
-  # end
-
   def test_etag_header
     args = { "status" => 200,
              "headers" =>  { "ETag" => "-1087556166" },
@@ -227,17 +136,6 @@ class CachedResponseTest < Minitest::Test
 
     assert_equal "Mon, 01 Jan 2000 00:00:01 GMT", result
   end
-
-  # def test_expiration
-  #   args = { "status" => 200,
-  #            "headers" =>  { "Expiration" => "Mon, 01 Jan 2000 00:00:01 GMT" },
-  #            "body" => "test body" }
-
-  #   cached_response = Rack::AcornCache::CachedResponse.new(args)
-  #   result = cached_response.expiration
-
-  #   assert_equal Time.httpdate("Mon, 01 Jan 2000 00:00:01 GMT"), result
-  # end
 
   def test_update_date_and_recache!
     args = { "status" => 200,
@@ -305,6 +203,117 @@ class CachedResponseTest < Minitest::Test
    server_response = mock("server response")
 
    refute cached_response.matches?(server_response)
+  end
+
+  def test_time_until_stale_when_s_maxage
+    args = { "status" => 200,
+             "headers" =>  { "Cache-Control" => "s-maxage=30" },
+             "body" => "test body" }
+
+   cached_response = Rack::AcornCache::CachedResponse.new(args)
+   result = cached_response.time_until_stale
+
+   assert_equal 30, result
+  end
+
+  def test_time_until_stale_when_maxage
+    args = { "status" => 200,
+             "headers" =>  { "Cache-Control" => "max-age=30" },
+             "body" => "test body" }
+
+   cached_response = Rack::AcornCache::CachedResponse.new(args)
+   result = cached_response.time_until_stale
+
+   assert_equal 30, result
+  end
+
+  def test_time_until_stage_when_expiration_header
+    args = { "status" => 200,
+             "headers" =>  { "Expiration" => "Mon, 01 Jan 2000 00:00:01 GMT" },
+             "body" => "test body" }
+             
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+    result = cached_response.time_until_stale
+
+    assert_equal Time.httpdate("Mon, 01 Jan 2000 00:00:01 GMT"), result
+  end
+
+  def test_fresh_returns_true_using_max_age
+    args = { "status" => 200,
+             "headers" =>  { "Cache-Control" => "max-age=30", "Date" => "Mon, 01 Jan 2000 00:00:01 GMT" },
+             "body" => "test body" }
+
+    Time.stubs(:now).returns(Time.at(0))
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+    cached_response.expects(:date).returns(Time.httpdate("Mon, 01 Jan 2000 00:00:01 GMT"))
+
+    assert cached_response.fresh?
+  end
+
+  def test_fresh_returns_false_using_max_age
+    args = { "status" => 200,
+             "headers" =>  { "Cache-Control" => "max-age=30", "Date" => "Mon, 01 Jan 2000 00:00:01 GMT" },
+             "body" => "test body" }
+
+    Time.stubs(:now).returns(Time.new(2016, "jan", 1, 1, 1, 1))
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+    cached_response.expects(:date).returns(Time.httpdate("Mon, 01 Jan 2000 00:00:01 GMT"))
+
+    refute cached_response.fresh?
+  end
+
+  def test_date
+    args = { "status" => 200,
+             "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT" },
+             "body" => "test body" }
+
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+    result = cached_response.date
+
+    assert_equal Time.httpdate("Mon, 01 Jan 2000 00:00:01 GMT"), result
+  end
+
+  def test_expiration_date_if_s_maxage
+    args = { "status" => 200,
+             "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT", "Cache-Control" => "s-maxage=30" },
+             "body" => "test body" }
+
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+    result = cached_response.expiration_date
+
+    assert_equal Time.httpdate("Mon, 01 Jan 2000 00:00:31 GMT"), result
+  end
+
+  def test_expiration_date_if_maxage
+    args = { "status" => 200,
+             "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT", "Cache-Control" => "max-age=30" },
+             "body" => "test body" }
+
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+    result = cached_response.expiration_date
+
+    assert_equal Time.httpdate("Mon, 01 Jan 2000 00:00:31 GMT"), result
+  end
+
+  def test_expiration_date_if_expiration_header
+    args = { "status" => 200,
+             "headers" =>  { "Expiration" => "Mon, 01 Jan 2000 00:00:01 GMT" },           "body" => "test body" }
+
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+    result = cached_response.expiration_date
+
+    assert_equal Time.httpdate("Mon, 01 Jan 2000 00:00:01 GMT"), result
+  end
+
+  def test_expiration_date_for_default_max_age
+    args = { "status" => 200,
+             "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT" },
+             "body" => "test body" }
+
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+    result = cached_response.expiration_date
+
+    assert_equal Time.httpdate("Mon, 01 Jan 2000 01:00:01 GMT"), result
   end
 end
 
