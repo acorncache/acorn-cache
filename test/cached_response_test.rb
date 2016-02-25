@@ -17,17 +17,18 @@ class CachedResponseTest < Minitest::Test
     assert_equal "test body", cached_response.body
   end
 
-  # def test_fresh?
-  #   args = { "status" => 200,
-  #            "headers" =>  { "Cache-Control" => "no-cache" },
-  #            "body" => "test body" }
+  #TODO: test more extensively, don't mock out expiration_date
+  def test_fresh?
+    args = { "status" => 200,
+             "headers" =>  { "Cache-Control" => "no-cache" },
+             "body" => "test body" }
 
-  #   expiration_date = Time.new(2002)
-  #   cached_response = Rack::AcornCache::CachedResponse.new(args)
-  #   cached_response.expects(:expiration_date).returns(expiration_date)
+    expiration_date = Time.new(2002)
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+    cached_response.expects(:expiration_date).returns(expiration_date)
 
-  #   refute cached_response.fresh?
-  # end
+    refute cached_response.fresh?
+  end
 
   def test_no_cache_delegation
     args = { "status" => 200,
@@ -244,7 +245,7 @@ class CachedResponseTest < Minitest::Test
              "body" => "test body" }
 
     cached_response = Rack::AcornCache::CachedResponse.new(args)
-    
+
     assert cached_response
   end
 

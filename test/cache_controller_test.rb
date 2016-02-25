@@ -66,7 +66,7 @@ class CacheControllerTest < MiniTest::Test
 
     Rack::AcornCache::CacheReader.expects(:read).with("/").returns(cached_response)
 
-    cached_response.expects(:fresh_for?).with(request).returns(false)
+    Rack::AcornCache::FreshnessRules.expects(:cached_response_fresh_for_request?).with(cached_response, request).returns(false)
     Rack::AcornCache::ServerResponse.expects(:new).with(200, {}, "foo").returns(server_response)
     Rack::AcornCache::CacheMaintenance.expects(:new).with("/", server_response, cached_response).returns(cache_maintenance)
     cache_maintenance.expects(:update_cache).returns(cache_maintenance)
@@ -84,7 +84,7 @@ class CacheControllerTest < MiniTest::Test
 
     Rack::AcornCache::CacheReader.expects(:read).with("/").returns(cached_response)
 
-    cached_response.expects(:fresh_for?).with(request).returns(true)
+    Rack::AcornCache::FreshnessRules.expects(:cached_response_fresh_for_request?).with(cached_response, request).returns(true)
     Rack::AcornCache::CacheMaintenance.expects(:new).with("/", nil, cached_response).returns(cache_maintenance)
     cache_maintenance.expects(:update_cache).returns(cache_maintenance)
     cache_maintenance.expects(:response).returns(cached_response)
