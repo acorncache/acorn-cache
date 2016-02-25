@@ -238,7 +238,13 @@ class CachedResponseTest < Minitest::Test
   end
 
   def test_update_date_and_recache!
+    args = { "status" => 200,
+             "headers" =>  { "X-Acorn-Cache" => "already-exists" },
+             "body" => "test body" }
 
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+    
+    assert cached_response
   end
 
   def test_add_acorn_cache_header_when_already_present
