@@ -29,8 +29,6 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.10"
   spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "rspec"
-  spec.add_development_dependency "factory_girl"
   spec.add_development_dependency "pry"
   spec.add_development_dependency "mocha"
   spec.add_runtime_dependency "rack", "~> 1.6"
