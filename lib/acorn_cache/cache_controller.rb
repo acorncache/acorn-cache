@@ -2,7 +2,6 @@ require 'acorn_cache/cache_reader'
 require 'acorn_cache/cache_maintenance'
 require 'acorn_cache/server_response'
 require 'acorn_cache/cached_response'
-require 'acorn_cache/freshness_rules'
 
 class Rack::AcornCache
   class CacheController
@@ -14,14 +13,13 @@ class Rack::AcornCache
     def response
       if request.no_cache?
         server_response = get_response_from_server
-        cached_response = NullCachedResponse.new
       else
         cached_response = check_for_cached_response
 
         if cached_response.must_be_revalidated?
           request.update_conditional_headers!(cached_response)
           server_response = get_response_from_server
-        elsif !FreshnessRules.cached_response_fresh_for_request?(cached_response, request)
+        elsif !cached_response.fresh_for_request?(request)
           server_response = get_response_from_server
         end
       end
@@ -37,7 +35,12 @@ class Rack::AcornCache
     attr_reader :request, :app
 
     def get_response_from_server
-      status, headers, body = @app.call(request.env)
+      begin
+        status, headers, body = @app.call(request.env)
+      rescue => e
+        raise AppException.new(e)
+      end
+
       ServerResponse.new(status, headers, body)
     end
 

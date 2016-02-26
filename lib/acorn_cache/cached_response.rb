@@ -1,6 +1,7 @@
 require 'acorn_cache/cache_control_header'
 require 'acorn_cache/cache_writer'
 require 'forwardable'
+require 'acorn_cache/freshness_rules'
 
 class Rack::AcornCache
   class CachedResponse
@@ -65,7 +66,7 @@ class Rack::AcornCache
     end
 
     def time_until_stale
-      s_maxage || max_age || expiration_header_time
+      s_maxage || max_age || (expiration_header_time - date)
     end
 
     alias_method :stale_time_specified?, :time_until_stale
@@ -96,6 +97,10 @@ class Rack::AcornCache
 
     def present?
       true
+    end
+
+    def fresh_for_request?(request)
+      FreshnessRules.cached_response_fresh_for_request?(request, self)
     end
 
     private
