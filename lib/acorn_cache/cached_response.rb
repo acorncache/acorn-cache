@@ -65,11 +65,11 @@ class Rack::AcornCache
       end
     end
 
-    def time_until_stale
+    def time_to_live
       s_maxage || max_age || (expiration_header_time - date)
     end
 
-    alias_method :stale_time_specified?, :time_until_stale
+    alias_method :stale_time_specified?, :time_to_live
 
     def fresh?
       expiration_date > Time.now
@@ -93,10 +93,6 @@ class Rack::AcornCache
 
     def time_until_expiration
       Time.now - expiration
-    end
-
-    def present?
-      true
     end
 
     def fresh_for_request?(request)
@@ -123,10 +119,6 @@ class Rack::AcornCache
   end
 
   class NullCachedResponse
-    def present?
-      false
-    end
-
     def must_be_revalidated?
       false
     end
@@ -135,7 +127,10 @@ class Rack::AcornCache
       false
     end
 
-    def update!
+    def update!; end
+
+    def fresh_for_request?(request)
+      false
     end
   end
 end

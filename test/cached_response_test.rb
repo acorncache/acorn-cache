@@ -205,37 +205,37 @@ class CachedResponseTest < Minitest::Test
    refute cached_response.matches?(server_response)
   end
 
-  def test_time_until_stale_when_s_maxage
+  def test_time_to_live_when_s_maxage
     args = { "status" => 200,
              "headers" =>  { "Cache-Control" => "s-maxage=30" },
              "body" => "test body" }
 
    cached_response = Rack::AcornCache::CachedResponse.new(args)
-   result = cached_response.time_until_stale
+   result = cached_response.time_to_live
 
    assert_equal 30, result
   end
 
-  def test_time_until_stale_when_maxage
+  def test_time_to_live_when_maxage
     args = { "status" => 200,
              "headers" =>  { "Cache-Control" => "max-age=30" },
              "body" => "test body" }
 
    cached_response = Rack::AcornCache::CachedResponse.new(args)
-   result = cached_response.time_until_stale
+   result = cached_response.time_to_live
 
    assert_equal 30, result
   end
 
-  def test_time_until_stage_when_expiration_header
+  def test_time_to_live_when_expiration_header
     args = { "status" => 200,
-             "headers" =>  { "Expiration" => "Mon, 01 Jan 2000 00:00:01 GMT" },
+             "headers" =>  { "Expiration" => "Mon, 01 Jan 2000 00:00:21 GMT", "Date" => "Mon, 01 Jan 2000 00:00:01 GMT" },
              "body" => "test body" }
-             
-    cached_response = Rack::AcornCache::CachedResponse.new(args)
-    result = cached_response.time_until_stale
 
-    assert_equal Time.httpdate("Mon, 01 Jan 2000 00:00:01 GMT"), result
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+    result = cached_response.time_to_live
+
+    assert_equal 20, result
   end
 
   def test_fresh_returns_true_using_max_age
@@ -318,10 +318,10 @@ class CachedResponseTest < Minitest::Test
 end
 
 class NullCachedResponseTest < Minitest::Test
-  def test_present?
+  def test_fresh_for_request?
     null_cached_response = Rack::AcornCache::NullCachedResponse.new
 
-    refute null_cached_response.present?
+    refute null_cached_response.fresh_for_request?("something")
   end
 
   def test_must_be_revalidated?

@@ -25,7 +25,7 @@ class Rack::AcornCache
 
     def max_age_more_restrictive?(cached_response)
       cached_response.stale_time_specified? &&
-        max_age && max_age < cached_response.time_until_stale
+        max_age && max_age < cached_response.time_to_live
     end
 
     private

@@ -80,16 +80,16 @@ class RequestTest < Minitest::Test
     refute request.max_age_more_restrictive?(cached_response)
   end
 
-  def test_max_age_more_restrictive_when_max_age_greater_than_cached_response_time_until_stale
-    cached_response = stub(stale_time_specified?: true, time_until_stale: 30)
+  def test_max_age_more_restrictive_when_max_age_greater_than_cached_response_time_to_live
+    cached_response = stub(stale_time_specified?: true, time_to_live: 30)
     env = { "HTTP_CACHE_CONTROL" => "max-age=40" }
     request = Rack::AcornCache::Request.new(env)
 
     refute request.max_age_more_restrictive?(cached_response)
   end
 
-  def test_max_age_more_restrictive_when_max_age_less_than_cached_response_time_until_stale
-    cached_response = stub(stale_time_specified?: true, time_until_stale: 30)
+  def test_max_age_more_restrictive_when_max_age_less_than_cached_response_time_to_live
+    cached_response = stub(stale_time_specified?: true, time_to_live: 30)
     env = { "HTTP_CACHE_CONTROL" => "max-age=20" }
     request = Rack::AcornCache::Request.new(env)
 

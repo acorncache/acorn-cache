@@ -3,7 +3,7 @@ require 'minitest/autorun'
 
 class FreshnessRulesTest < Minitest::Test
   def test_cached_response_fresh_for_request_when_no_cached_response_present
-    cached_response = stub(present?: false)
+    cached_response = nil
     request = mock
 
     refute Rack::AcornCache::FreshnessRules.cached_response_fresh_for_request?(cached_response, request)
