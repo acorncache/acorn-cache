@@ -22,7 +22,7 @@ class Rack::AcornCache
         value = instance_variable_get(ivar)
         next directive if value == true
         "#{directive}=#{value}"
-      end.join(", ")
+      end.sort.join(", ")
     end
 
     private

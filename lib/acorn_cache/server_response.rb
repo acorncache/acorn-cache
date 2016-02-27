@@ -1,13 +1,10 @@
 require 'acorn_cache/cache_control_header'
 require 'acorn_cache/cache_writer'
-require 'forwardable'
+require 'json'
 
 class Rack::AcornCache
   class ServerResponse < Rack::Response
-    extend Forwardable
-    def_delegators :@cache_control_header, :private?, :no_store?
-
-    attr_reader :status, :headers, :body
+    attr_reader :status, :headers, :body, :cache_control_header
 
     def initialize(status, headers, body)
       @status = status
@@ -49,9 +46,7 @@ class Rack::AcornCache
       self
     end
 
-    def update_with_page_rules!(request)
-      return unless request.page_rule?
-
+    def update_with_page_rules!(page_rule)
       if page_rule[:acorn_cache_ttl] || page_rule[:browser_cache_ttl]
         self.no_cache = nil
         self.no_store = nil
@@ -68,6 +63,11 @@ class Rack::AcornCache
       end
 
       headers["Cache-Control"] = cache_control_header.to_s
+      self
+    end
+
+    def method_missing(method, *args)
+      cache_control_header.send(method, *args)
     end
   end
 end

@@ -41,7 +41,13 @@ class Rack::AcornCache
         raise AppException.new(e)
       end
 
-      ServerResponse.new(status, headers, body).update_with_page_rules!(request)
+      server_response = ServerResponse.new(status, headers, body)
+      require 'pry'; binding.pry
+      if request.page_rule?
+        server_response.update_with_page_rules!(request.page_rule)
+      else
+        server_response
+      end
     end
 
     def check_for_cached_response
