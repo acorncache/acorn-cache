@@ -17,22 +17,26 @@ class Rack::AcornCache
     alias_method :no_store?, :no_store
     alias_method :must_revalidate?, :must_revalidate
 
+    def to_s
+    end
+
     private
 
     def set_directive_instance_variables!
       @header_string.gsub(/\s+/, "").split(",").each do |directive, result|
         k, v = directive.split("=")
-        send(writer_method(k), directive_value(v)) rescue NoMethodError
+        instance_variable_set(variable_symbol(k), directive_value(v))
       end
     end
 
-    def writer_method(directive)
-      "#{directive.gsub("-", "_")}=".to_sym
+    def variable_symbol(directive)
+      "@#{directive.gsub("-", "_")}".to_sym
     end
 
     def directive_value(value)
       return value.to_i if value =~ /^[0-9]+$/
-      value.nil?
+      return true if value.nil?
+      value
     end
   end
 end

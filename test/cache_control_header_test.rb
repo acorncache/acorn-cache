@@ -20,14 +20,6 @@ class CacheControlHeaderTest < MiniTest::Test
     refute cache_control_header.max_age
   end
 
-  def test_max_age_not_well_formed
-    header_string = "max-age=foo"
-    cache_control_header = Rack::AcornCache::CacheControlHeader.new(header_string)
-    max_age = cache_control_header.max_age
-
-    refute max_age
-  end
-
   def test_s_max_age
     header_string = "s-maxage=30"
     cache_control_header = Rack::AcornCache::CacheControlHeader.new(header_string)
