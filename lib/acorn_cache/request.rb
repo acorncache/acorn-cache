@@ -29,13 +29,24 @@ class Rack::AcornCache
         max_age && max_age < cached_response.time_to_live
     end
 
-    def no_page_rule_for_url?
-      page_rules = Rack::AcornCache.configuration.page_rules
-      return false unless page_rules
-      page_rules.keys.none? { |key| key_matches_url?(key) }
+    def cacheable?
+      get? && (config.cache_everything || page_rule?)
     end
 
+    def page_rule
+      @page_rule ||= 
+        config.page_rules.find(proc { return nil }) do |k, _|
+          key_matches_url?(k)
+        end.last
+    end
+
+    alias_method :page_rule?, :page_rule
+
     private
+
+    def config
+      Rack::AcornCache.configuration
+    end
 
     def key_matches_url?(key)
       return url =~ key if key.is_a?(Regexp)

@@ -95,4 +95,141 @@ class RequestTest < Minitest::Test
 
     assert request.max_age_more_restrictive?(cached_response)
   end
+
+  def test_page_rule_when_none_specified
+    request = Rack::AcornCache::Request.new({})
+
+    refute request.page_rule?
+    refute request.page_rule
+  end
+
+  def test_page_rule_when_specified
+    Rack::AcornCache.configure do |config|
+      config.page_rules = { "foo.com" => { acorn_cache_ttl: 30 } }
+    end
+
+    request = Rack::AcornCache::Request.new({})
+    request.stubs(:url).returns("foo.com")
+
+    assert request.page_rule?
+    assert_includes(request.page_rule, :acorn_cache_ttl)
+    assert_equal 30, request.page_rule[:acorn_cache_ttl]
+  end
+
+  def test_cacheable_when_cache_everything_true_and_no_page_rule_set_for_url
+    Rack::AcornCache.configure do |config|
+      config.cache_everything = true
+      config.page_rules = { "foo.com" => { acorn_cache_ttl: 30 } }
+    end
+
+    request = Rack::AcornCache::Request.new({})
+    request.stubs(:url).returns("bar.com")
+    request.stubs(:get?).returns(true)
+
+    assert request.cacheable?
+  end
+
+  def test_cacheable_when_cache_everything_false_and_page_rule_set_for_url_with_normal_string
+    Rack::AcornCache.configure do |config|
+      config.cache_everything = false
+      config.page_rules = { "foo.com" => { acorn_cache_ttl: 30 } }
+    end
+
+    request = Rack::AcornCache::Request.new({})
+    request.stubs(:url).returns("foo.com")
+    request.stubs(:get?).returns(true)
+
+    assert request.cacheable?
+  end
+
+  def test_cacheable_when_cache_everything_false_and_page_rule_set_for_url_with_wildcard_string
+    Rack::AcornCache.configure do |config|
+      config.cache_everything = false
+      config.page_rules = { "f*.com" => { acorn_cache_ttl: 30 } }
+    end
+
+    request = Rack::AcornCache::Request.new({})
+    request.stubs(:url).returns("foo.com")
+    request.stubs(:get?).returns(true)
+
+    assert request.cacheable?
+  end
+
+  def test_cacheable_when_cache_everything_false_and_no_page_rule_set_for_url_with_wildcard_string
+    Rack::AcornCache.configure do |config|
+      config.cache_everything = false
+      config.page_rules = { "b*.com" => { acorn_cache_ttl: 30 } }
+    end
+
+    request = Rack::AcornCache::Request.new({})
+    request.stubs(:url).returns("foo.com")
+    request.stubs(:get?).returns(true)
+
+    refute request.cacheable?
+  end
+
+  def test_cacheable_when_cache_everything_false_page_rule_set_for_url_with_wildcard_string_specifying_cache_all_http
+    Rack::AcornCache.configure do |config|
+      config.cache_everything = false
+      config.page_rules = { "http://*.com" => { acorn_cache_ttl: 30 } }
+    end
+
+    request = Rack::AcornCache::Request.new({})
+    request.stubs(:url).returns("http://foo.com")
+    request.stubs(:get?).returns(true)
+
+    assert request.cacheable?
+  end
+
+  def test_cacheable_when_cache_everything_false_page_rule_set_for_url_with_wildcard_string_specifying_cache_all_https
+    Rack::AcornCache.configure do |config|
+      config.cache_everything = false
+      config.page_rules = { "https://*.com" => { acorn_cache_ttl: 30 } }
+    end
+
+    request = Rack::AcornCache::Request.new({})
+    request.stubs(:url).returns("http://foo.com")
+    request.stubs(:get?).returns(true)
+
+    refute request.cacheable?
+  end
+
+  def test_cacheable_when_cache_everything_false_page_rule_set_for_url_with_wildcard_string_specifying_cache_all_js
+    Rack::AcornCache.configure do |config|
+      config.cache_everything = false
+      config.page_rules = { "*.js" => { acorn_cache_ttl: 30 } }
+    end
+
+    request = Rack::AcornCache::Request.new({})
+    request.stubs(:url).returns("foo.js")
+    request.stubs(:get?).returns(true)
+
+    assert request.cacheable?
+  end
+
+  def test_cacheable_when_cache_everything_false_page_rule_set_for_url_with_regex
+    Rack::AcornCache.configure do |config|
+      config.cache_everything = false
+      config.page_rules = { /fo{2}\.com/ => { acorn_cache_ttl: 30 } }
+    end
+
+    request = Rack::AcornCache::Request.new({})
+    request.stubs(:url).returns("foo.com")
+    request.stubs(:get?).returns(true)
+
+    assert request.cacheable?
+  end
+
+  def test_cacheable_when_cache_everything_false_no_page_rule_set_for_url_with_regex
+    Rack::AcornCache.configure do |config|
+      config.cache_everything = false
+      config.page_rules = { /^fo{2}\.com$/ => { acorn_cache_ttl: 30 } }
+    end
+
+    request = Rack::AcornCache::Request.new({})
+    request.stubs(:url).returns("bar.foo.com/baz")
+    request.stubs(:get?).returns(true)
+
+    refute request.cacheable?
+  end
 end

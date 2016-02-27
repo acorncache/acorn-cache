@@ -2,7 +2,9 @@ require 'rack'
 
 class Rack::AcornCache
   class CacheControlHeader
-    def initialize(header_string)
+    attr_accessor :header_hash
+
+    def initialize(header_string = "")
       @header_string = header_string
       @header_hash = to_h
     end
@@ -17,6 +19,10 @@ class Rack::AcornCache
 
     def no_cache?
       header_hash["no-cache"]
+    end
+
+    def no_cache=(value)
+      header_hash["no-cache"] = value
     end
 
     def no_store?

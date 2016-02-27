@@ -41,7 +41,7 @@ class Rack::AcornCache
         raise AppException.new(e)
       end
 
-      ServerResponse.new(status, headers, body)
+      ServerResponse.new(status, headers, body).update_with_page_rules!(request)
     end
 
     def check_for_cached_response

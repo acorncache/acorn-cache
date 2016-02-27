@@ -10,7 +10,12 @@ class Rack::AcornCache
 
   class Configuration
     attr_reader :page_rules
-    attr_accessor :default_acorn_cache_ttl, :default_browser_cache_ttl
+    attr_accessor :default_acorn_cache_ttl, :default_browser_cache_ttl, 
+                  :cache_everything
+
+    def initialize
+      @cache_everything = false
+    end
 
     def page_rules=(user_page_rules)
       @page_rules = user_page_rules.each_with_object({}) do |(k, v), result|
@@ -28,6 +33,7 @@ class Rack::AcornCache
   end
 
   # Rack::AcornCache.configure do |config|
+  #   config.cache_everything = true
   #   config.default_acorn_cache_ttl = 3600
   #   config.page_rules = {
   #     "http://example.com/*.js" => { browser_cache_ttl: 30,

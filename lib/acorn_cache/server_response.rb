@@ -48,5 +48,26 @@ class Rack::AcornCache
       CacheWriter.write(request_path, serialize)
       self
     end
+
+    def update_with_page_rules!(request)
+      return unless request.page_rule?
+
+      if page_rule[:acorn_cache_ttl] || page_rule[:browser_cache_ttl]
+        self.no_cache = nil
+        self.no_store = nil
+        self.must_revalidate = nil
+      end
+
+      if page_rule[:acorn_cache_ttl]
+        self.s_maxage = page_rule[:acorn_cache_ttl]
+        self.private = nil
+      end
+
+      if page_rule[:browser_cache_ttl]
+        self.max_age = page_rule[:browser_cache_ttl]
+      end
+
+      headers["Cache-Control"] = cache_control_header.to_s
+    end
   end
 end

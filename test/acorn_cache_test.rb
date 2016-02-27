@@ -15,7 +15,7 @@ class AcornCacheTest < Minitest::Test
 
   def test_catch_and_re_raise_caught_app_exception
     env = { }
-    request = stub(no_cache?: true, get?: true, env: { }, no_page_rule_for_url?: true)
+    request = stub(no_cache?: true, env: { }, cacheable?: true)
     Rack::AcornCache::Request.stubs(:new).returns(request)
     app = mock("app")
     app.stubs(:call).raises(StandardError)
@@ -36,7 +36,7 @@ class AcornCacheTest < Minitest::Test
   end
 
   def test_call_passes_request_and_app_to_cache_controller_if_ok
-    request = stub( get?: true, no_page_rule_for_url?: true )
+    request = stub(cacheable?: true)
     response = mock("response")
     cache_controller = mock("cache controller")
     env = { "REQUEST_METHOD" => "GET" }
