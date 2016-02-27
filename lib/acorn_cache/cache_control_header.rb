@@ -6,9 +6,8 @@ class Rack::AcornCache
                   :must_revalidate, :private, :max_fresh, :max_stale
 
     def initialize(header_string = "")
-      @header_string = header_string
-      return unless @header_string
-      set_directive_instance_variables!
+      return unless header_string && !header_string.empty?
+      set_directive_instance_variables!(header_string)
     end
 
     alias_method :max_stale?, :max_stale
@@ -18,12 +17,18 @@ class Rack::AcornCache
     alias_method :must_revalidate?, :must_revalidate
 
     def to_s
+      instance_variables.map do |ivar|
+        directive = ivar.to_s.sub("@", "").sub("_", "-")
+        value = instance_variable_get(ivar)
+        next directive if value == true
+        "#{directive}=#{value}"
+      end.join(", ")
     end
 
     private
 
-    def set_directive_instance_variables!
-      @header_string.gsub(/\s+/, "").split(",").each do |directive, result|
+    def set_directive_instance_variables!(header_string)
+      header_string.gsub(/\s+/, "").split(",").each do |directive, result|
         k, v = directive.split("=")
         instance_variable_set(variable_symbol(k), directive_value(v))
       end
