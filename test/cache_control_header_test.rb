@@ -11,13 +11,13 @@ class CacheControlHeaderTest < MiniTest::Test
   def test_max_age_not_present
     header_string = "private"
     cache_control_header = Rack::AcornCache::CacheControlHeader.new(header_string)
-    assert_equal cache_control_header.max_age, nil
+    refute cache_control_header.max_age
   end
 
   def test_max_age_no_cache_control_header_present
     header_string = nil
     cache_control_header = Rack::AcornCache::CacheControlHeader.new(header_string)
-    assert_equal cache_control_header.max_age, nil
+    refute cache_control_header.max_age
   end
 
   def test_max_age_not_well_formed
@@ -25,7 +25,7 @@ class CacheControlHeaderTest < MiniTest::Test
     cache_control_header = Rack::AcornCache::CacheControlHeader.new(header_string)
     max_age = cache_control_header.max_age
 
-    assert_equal max_age, nil
+    refute max_age
   end
 
   def test_s_max_age
