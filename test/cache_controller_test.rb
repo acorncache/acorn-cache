@@ -87,15 +87,17 @@ class CacheControllerTest < MiniTest::Test
   end
 
   def test_response_when_request_no_cache_true_and_page_rules_set
-    request = stub(no_cache?: false, env: {}, page_rule?: true, page_rule: { acorn_cache_ttl: 30 })
+    request = stub(no_cache?: true, env: {}, path: "/", page_rule?: true, page_rule: { acorn_cache_ttl: 30 })
     app = stub(call: [200, {}, "foo"])
     server_response = mock("server response")
 
     Rack::AcornCache::ServerResponse.stubs(:new).returns(server_response)
-    Rack::AcornCache::CacheMaintenance.stubs(:new)
+    Rack::AcornCache::CacheMaintenance.stubs(:new).returns(server_response)
+    server_response.stubs(:update_cache).returns(server_response)
+    server_response.stubs(:response)
 
     server_response.expects(:update_with_page_rules!).with(acorn_cache_ttl: 30)
 
-    Rack::AcornCache::CacheController.new(request, app)
+    Rack::AcornCache::CacheController.new(request, app).response
   end
 end
