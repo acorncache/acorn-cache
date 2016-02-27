@@ -10,8 +10,7 @@ class Rack::AcornCache
 
   class Configuration
     attr_reader :page_rules
-    attr_accessor :default_acorn_cache_ttl, :default_browser_cache_ttl,
-                  :default_regex
+    attr_accessor :default_acorn_cache_ttl, :default_browser_cache_ttl
 
     def page_rules=(user_page_rules)
       @page_rules = user_page_rules.each_with_object({}) do |(k, v), result|

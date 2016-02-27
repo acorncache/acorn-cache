@@ -1,6 +1,7 @@
 require 'rack/request'
 require 'acorn_cache/cache_control_header'
 require 'forwardable'
+require 'acorn_cache/config'
 
 class Rack::AcornCache
   class Request < Rack::Request
@@ -28,7 +29,19 @@ class Rack::AcornCache
         max_age && max_age < cached_response.time_to_live
     end
 
+    def no_page_rule_for_url?
+      page_rules = Rack::AcornCache.configuration.page_rules
+      return false unless page_rules
+      page_rules.keys.none? { |key| key_matches_url?(key) }
+    end
+
     private
+
+    def key_matches_url?(key)
+      return url =~ key if key.is_a?(Regexp)
+      string = key.gsub("*", ".*")
+      url =~ /^#{string}$/
+    end
 
     def if_none_match=(etag)
       env["HTTP_IF_NONE_MATCH"] = etag

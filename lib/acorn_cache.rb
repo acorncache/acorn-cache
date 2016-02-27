@@ -14,7 +14,7 @@ class Rack::AcornCache
 
   def _call(env)
     request = Request.new(env)
-    return @app.call(env) unless request.get?
+    return @app.call(env) unless request.get? && request.no_page_rule_for_url?
 
     begin
       CacheController.new(request, @app).response.to_a
