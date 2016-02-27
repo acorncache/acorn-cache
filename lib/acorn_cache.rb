@@ -1,5 +1,6 @@
 require 'acorn_cache/request'
 require 'acorn_cache/cache_controller'
+require 'acorn_cache/app_exception'
 require 'rack'
 
 class Rack::AcornCache

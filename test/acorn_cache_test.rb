@@ -13,11 +13,22 @@ class AcornCacheTest < Minitest::Test
     assert_equal [200, { }, ["foo"]], acorn_cache.call(env)
   end
 
-  def test_call_returns_app_if_error
-    env = { "REQUEST_METHOD" => "GET" }
-    Rack::AcornCache::CacheController.stubs(:new).raises(StandardError)
+  def test_catch_and_re_raise_caught_app_exception
+    env = { }
+    request = stub(no_cache?: true, get?: true, env: { })
+    Rack::AcornCache::Request.stubs(:new).returns(request)
     app = mock("app")
-    app.stubs(:call).returns([200, { }, ["foo"]])
+    app.stubs(:call).raises(StandardError)
+
+    acorn_cache = Rack::AcornCache.new(app)
+
+    assert_raises (StandardError) { acorn_cache.call(env) }
+  end
+
+  def test_catch_and_rescue_exception_from_cache_controller
+    env = { }
+    Rack::AcornCache::CacheController.stubs(:new).raises(StandardError)
+    app = stub(call: [200, { }, ["foo"]])
 
     acorn_cache = Rack::AcornCache.new(app)
 
