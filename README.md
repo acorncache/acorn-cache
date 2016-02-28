@@ -42,7 +42,7 @@ config.middleware.use Rack::AcornCache
 You should now see ```Rack::AcornCache``` listed in the middleware pipeline when you run `rake middleware`.
 
 For non-Rails Rack apps, just include the following in your rackup (.ru) file:
-```
+```ruby
 require 'acorn_cache'
 
 use Rack::AcornCache
@@ -67,7 +67,7 @@ AcornCache how long to store a resource.
 
 The config below specifies two URLs to cache and specifies the time to live, i.e., the time the resource at that location should live in AcornCache and the browser cache. With this config, AcornCache will only cache the resources at these two URLs:
 
-```
+```ruby
 Rack::AcornCache.configure do |config|
   config.page_rules = {
     "http://example.com/" => { browser_cache_ttl: 30 },
@@ -80,7 +80,7 @@ If you choose to do so, you can have AcornCache act as an RFC compliant
 shared proxy-cache for every resource on your server. For information concerning standard RFC caching rules,
 please refer to the Further Information section below. To operate in this mode, just set:
 
-```
+```ruby
 config.cache_everything = true
 ```
 Keep in mind that you can override standard caching behavior even when in cache
@@ -95,12 +95,12 @@ Configuration options can be set for individual URLs via the
 ```ruby
 Rack::AcornCache.configure do |config|
   config.page_rules = {
-    { "http://foo.com" => { acorn_cache_ttl: 3600,
-                            broswer_cache_ttl: 800,
-      "http://bar.com/*" => { broswer_cache_ttl: 3600,
-                              ignore_query_params: true }
-      /^https+://.+\.com/ => { respect_default_header: true,
-                               ignore_query_params: true }
+    { "http://foo.com"     => { acorn_cache_ttl: 3600,
+                                broswer_cache_ttl: 800,
+      "http://bar.com/*"   => { broswer_cache_ttl: 3600,
+                                ignore_query_params: true }
+      /^https+://.+\.com/  => { respect_default_header: true,
+                                ignore_query_params: true }
     }
 end
 ```
@@ -109,17 +109,20 @@ Resources best suited for caching are public (not behind authentication) and don
 AcornCache provides you with three options for defining the URLs for the resources that you want to cache:
 
 1. You can define a single URL explicitly:
-
-  `"http://www.foobar.com/baz" => { acorn_cache_ttl: 100 }`
+   ```ruby
+   "http://www.foobar.com/baz" => { acorn_cache_ttl: 100 }
+   ```
 
 2. You can use wildcards to identify multiple pages for a which a given set of rules applies:
-
-  `"http://foo*.com" => { browser_cache_ttl: 86400" }`
+   ```ruby
+   "http://foo*.com" => { browser_cache_ttl: 86400" }
+   ```
 
 3. You can use regex pattern matching simply by using a `Regexp` object as the
   key:
-
-  `/^http://.+\..+$/` => { acorn_cache_ttl: 100 }`
+   ```ruby
+   /^http://.+\..+$/` => { acorn_cache_ttl: 100 }
+   ```
 
 
 ####Deciding How Resources Are Cached
