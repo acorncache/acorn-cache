@@ -1,6 +1,6 @@
 # AcornCache
 
-AcornCache is a Ruby HTTP proxy caching library that is lightweight, configurable and can be easily integrated with any Rack-based web application.
+AcornCache is a Ruby HTTP proxy caching library that is lightweight, configurable and can be easily integrated with any Rack-based web application. AcornCache allows you to improve page load times and lighten the load on your server by allowing you to implement an in-memory cache shared by every client requesting a resource on your server.
 
 Features currently available include the following:
 
@@ -8,9 +8,10 @@ Features currently available include the following:
 * Customized Page Rules on a global and per-page basis
 * Respects Cache-Control headers
 * Respects Conditional Requests
-* Works with any Rack-based framework   
 
-## Installation
+##Getting Started
+
+####Installation
 
 Add this line to your application's Gemfile:
 
@@ -22,75 +23,158 @@ And then execute:
 
     $ bundle
 
-Or install it yourself as:
+Or install it yourself:
 
     $ gem install acorn_cache
 
-## Configuration
 
-####Rails
-AcornCache must be included in the middleware pipeline of a Rails application.  To include it in the rack, add the following config option to your ```config/environment.rb```:
+AcornCache must be included in the middleware pipeline of your Rails or Rack application.
+
+With Rails, add the following config option to the appropriate environment, probably ```config/environments/production.rb```:
 
 ```ruby
-config.middleware.use "Rack::AcornCache"
+config.middleware.use Rack::AcornCache
 ```
 
 You should now see ```Rack::AcornCache``` listed in the middleware pipeline when you run `rake middleware`.
 
-AcornCache has a range of configuration options that can be configured both globally and on a page-by-page basis.  Create an initializer:
+For non-Rails Rack apps, just include the following in your rackup (.ru) file:
+```
+require 'acorn_cache'
+
+use Rack::AcornCache
+```
+
+####Setting Up Storage
+By default, AcornCache uses Redis to store server responses. You must include
+your Redis host, port, and password (if you have one set) as environment variables.
+
+```
+ACORNCAHE_REDIS_HOST="your_host_name"
+ACORNCACHE_REDIS_PORT="your_port_number"
+ACRONCACE_REDIS_PASSWORD="your_password"
+```
+
+####Configuration
+AcornCache has a range of configuration options.  Set them in an initializer:
 
 ```
 config/initializers/acorn_cache.rb
 ```
 
-And include your configuration options (example below):
+And include your configuration options (see below for descriptions of all the
+available options).
+
+Without configuration, AcornCache won't cache anything.  Two basic configuration
+patterns are possible. The most common will be to specify page rules telling
+AcornCache how long to store a resource.
+
+The config below specifies two URLs to cache and specifies the time to live, i.e., the time the resource at that location should live in AcornCache and the browser cache. With this config, AcornCache will only cache the resources at these two URLs:
 
 ```
 Rack::AcornCache.configure do |config|
-  config.cache_everything = true
-  config.default_acorn_cache_ttl = 3600
   config.page_rules = {
-    "http://example.com/*.js" => { browser_cache_ttl: 30 },
-      "another_url" => { acorn_cache_ttl: 100 },
-      "foo.com" => { respect_existing_headers: true }
-    }
+    "http://example.com/" => { browser_cache_ttl: 30 },
+    "http://foo.com/bar" => { acorn_cache_ttl: 100 },
+  }
 end
 ```
 
-TODO: Add configuration instructions for other platforms here.
+If you choose to do so, you can have AcornCache act as an RFC compliant
+shared proxy-cache for every resource on your server. For information concerning standard RFC caching rules,
+please refer to the Further Information section below. To operate in this mode, just set:
+
+```
+config.cache_everything = true
+```
+Keep in mind that you can override standard caching behavior even when in cache
+everything mode by specifying a page rule.
+
 
 ## Page Rules
+Configuration options can be set for individual URLs via the
+`page-rules` config option. The value of `page-rules` must be set to a hash. The hash must have a key that is either 1) a URL string or 2) a pattern that matches the URL of the page(s) for which you are setting the rule, and a value that specifies the caching rule(s) for the page or pages. Here's an example:
 
-You can set Page Rules in AcornCache at the global (or default) level, as well as, on a page-by-page basis.  
+```ruby
+Rack::AcornCache.configure do |config|
+  config.page_rules = {
+    { "http://foo.com" => { acorn_cache_ttl: 3600,
+                            broswer_cache_ttl: 800,
+      "http://bar.com/*" => { broswer_cache_ttl: 3600,
+                              ignore_query_params: true }
+      /^https+://.+\.com/ => { respect_default_header: true,
+                               ignore_query_params: true }
+    }
+end
+```
+####Deciding which pages are cached
+AcornCache provides you with three options for defining the URLs for the resources that you want to cache:
 
-#### Global Page Rules
-Global configuration options can be set directly on the config block variable in your configuration initializer and include the following:
-
-* `cache_everything` - when set to `true`, AcornCache will attempt to cache all incoming HTTP `GET` requests according to its default behavior.  For more information concerning the "out-of-the-box" caching rules that define AcornCache's default behavior, please refer to the Further Information section below.
-
-* `default_acorn_cache_ttl` - sets the time (in seconds) that will be applied as an `s-maxage` Cache-Control header.  This will be applied to all pages unless overridden by a specific page rule as described below.
-
-* `default_browser_cache_ttl` - sets the time (in seconds) that will be applied as an `maxage` Cache-Control header.  This will be applied to all pages unless overridden by a specific page rule as described below.
-
-* `default_ignore_query_params` - when set to `true`, AcornCache will ignore any query parameters contained in the url of the incoming HTTP request.
-
-#### Individual Page Rules
-Configuration options can be set for individual 'whitelisted' pages via the `page-rules` method when called on the `config` block variable in your configuration initializer. `page-rules` can be set as a hash; the key being the url of the page (or pages) for which you are setting the rule, and the value being the caching rule(s) you are setting for that particular page.
-
-AcornCache provides you with three options for defining the urls that you want to cache:
-
-* You can define a singular page explicitly:
+* You can define a single URL explicitly:
 
   `"http://www.foobar.com/baz" => { acorn_cache_ttl: 100 }`
 
-* You can use wildcards to identify multiple pages for a which a given rule (or set of rules) applies:
+* You can use wildcards to identify multiple pages for a which a given set of rules applies:
 
   `"http://foo*.com" => { browser_cache_ttl: 86400" }`
-* You can use a `Regexp`:
 
-  `/https?:\/\/[\S]+/ => { respect_existing_headers: true }`
+* You can use regex pattern matching simply by using a `Regexp` object as the
+  key:
 
-In addition, AcornCache provides you with the ability to respect the cache control headers that were provided from the client or origin server.  This can be achieved by setting `respect_existing_headers: true` for a page or given set of pages.
+  `/^http://.+\..+$/` => { acorn_cache_ttl: 100 }`
+
+
+####Deciding how pages are cached
+
+#####Respect Existing Cache Control Headers
+AcornCache provides you with the ability to respect the cache control headers that were provided from the client or origin server.  This can be achieved by setting `respect_existing_headers: true` for a page or given set of pages. This option is useful when you don't want to cache everything but you also want to control caching behavior by ensuring that responses come from your server with the proper cache control headers.  If you choose this option, you will likely want to ensure your response has an `s-maxage` directive, as AcornCache operates as a shared cache.
+
+
+#####Override Existinc Cache Control Headers
+Suppose you don't know or want to change the cache control headers included
+from your server.  AcornCache gives you the ability to control how a resource is
+cached by both AcornCache and the browser cache simply by specifying the
+appropriate page rule saettings.
+
+AcornCache provides three options, which can be set either as defaults or within
+individual page rules.
+
+1. `acorn_cache_ttl`
+This option specifies the time a resource should live in AcornCache before
+expiring.  It works by setting overriding the `s-maxage` directive in your cache control
+headers with the specified value. Time should be given in seconds. It also removes any directives that would
+prevent caching in a shared proxy cache, like `private` or `no-store`.
+
+2. `browser_cache_ttl`
+This option specified the time in seconds a resource should live in private
+browser caches before expiring.  It works by overriding the `max-age` directive
+in the cache contreol header with the specified value.  It also removes any
+directivs that would prevent caching in a private cache, like 'no-store'.
+
+3. `ignore-query-params`
+If the query params in a request shouldn't effect the response from your server,
+you can set this option as true so that all requests for a URL, regardless of
+the specified params, share the same cache entry. This means that if a resource
+that lives at `http://foo.com` is cached with AcornCache, a request to
+`http://foo.com/?bar=bax` will return that resource without creating another
+cache entry.
+
+These three options can be set either as defaults or for individual page rules.
+Default settings apply to any page that AcornCache is allowed to cache unless
+they are overwritten by a page rule. For example, if your
+config looks like this,
+
+```ruby
+RackAcornCache.configure do |config|
+  config.default_acorn_cache_ttl = 30
+  config.page_rules = {
+   "http://foo.com" => { use_defaults: true }
+   "http://bar.com" => { acorn_cache_ttl: 100 }
+end
+```ruby
+
+then every the resource at `foo.com` will be cached in AcornCache for 30 secondsbut the resource at `bar.com` will be cached for 100 seconds.
+
 
 ## Further Information
 
