@@ -1,9 +1,9 @@
 class Rack::AcornCache
   class CacheMaintenance
-    attr_reader :response, :request_path, :server_response, :cached_response
+    attr_reader :response, :cache_key, :server_response, :cached_response
 
-    def initialize(request_path, server_response, cached_response)
-      @request_path = request_path
+    def initialize(cache_key, server_response, cached_response)
+      @cache_key = cache_key
       @server_response = server_response
       @cached_response = cached_response
     end
@@ -14,9 +14,9 @@ class Rack::AcornCache
       elsif !server_response.cacheable? && !server_response.status_304?
         @response = server_response
       elsif server_response.cacheable?
-        @response = server_response.cache!(request_path)
+        @response = server_response.cache!(cache_key)
       elsif cached_response.matches?(server_response)
-        @response = cached_response.update_date_and_recache!(request_path)
+        @response = cached_response.update_date_and_recache!(cache_key)
       else
         @response = server_response
       end

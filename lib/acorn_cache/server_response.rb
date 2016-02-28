@@ -40,9 +40,9 @@ class Rack::AcornCache
       [status, headers, body]
     end
 
-    def cache!(request_path)
+    def cache!(cache_key)
       update_date!
-      CacheWriter.write(request_path, serialize)
+      CacheWriter.write(cache_key, serialize)
       self
     end
 

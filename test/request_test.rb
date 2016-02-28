@@ -232,4 +232,33 @@ class RequestTest < Minitest::Test
 
     refute request.cacheable?
   end
+
+  def test_cache_key_when_no_page_rule_set
+    request = Rack::AcornCache::Request.new({})
+    request.stubs(:url).returns("http://foo.com/bar?baz=true")
+
+    assert_equal "http://foo.com/bar?baz=true", request.cache_key
+  end
+
+  def test_cache_key_when_defualt_ignore_query_params_set
+    Rack::AcornCache.configure do |config|
+      config.cache_everything = true
+      config.default_ignore_query_params = true
+    end
+
+    env = { "rack.url_scheme" => "http",
+           "HTTP_HOST" => "foo.com",
+           "PATH_INFO" => "/bar",
+           "SERVER_PORT" => 80,
+           "QUERY_STRING" => "baz=true"}
+
+    request = Rack::AcornCache::Request.new(env)
+
+    assert_equal "http://foo.com/bar?baz=true", request.url
+    assert_equal "http://foo.com/bar", request.cache_key
+  end
+
+  def teardown
+    Rack::AcornCache.configuration = nil
+  end
 end

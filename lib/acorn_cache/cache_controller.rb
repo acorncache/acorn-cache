@@ -25,7 +25,7 @@ class Rack::AcornCache
       end
 
       CacheMaintenance
-        .new(request.path, server_response, cached_response)
+        .new(request.cache_key, server_response, cached_response)
         .update_cache
         .response
     end
@@ -50,7 +50,7 @@ class Rack::AcornCache
     end
 
     def check_for_cached_response
-      CacheReader.read(request.path) || NullCachedResponse.new
+      CacheReader.read(request.cache_key) || NullCachedResponse.new
     end
   end
 end

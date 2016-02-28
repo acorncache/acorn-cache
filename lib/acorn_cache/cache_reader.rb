@@ -5,8 +5,8 @@ require 'json'
 
 class Rack::AcornCache
   module CacheReader
-    def self.read(request_path)
-      response = RedisCache.redis.get(request_path)
+    def self.read(cache_key)
+      response = RedisCache.redis.get(cache_key)
       return false unless response
       response_hash = JSON.parse(response)
       CachedResponse.new(response_hash)

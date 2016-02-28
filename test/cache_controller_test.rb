@@ -3,7 +3,7 @@ require 'minitest/autorun'
 
 class CacheControllerTest < MiniTest::Test
   def test_response_when_request_no_cache_returns_server_response
-    request = stub(no_cache?: true, env: {}, path: "/", page_rule?: false)
+    request = stub(no_cache?: true, env: {}, cache_key: "/", page_rule?: false)
     app = stub(call: [200, {}, "foo"])
     server_response = mock('server_response')
     cache_maintenance = mock('cache_maintenance')
@@ -18,7 +18,7 @@ class CacheControllerTest < MiniTest::Test
   end
 
   def test_response_when_request_no_cache_false_and_theres_no_cached_version
-    request = stub(no_cache?: false, path: "/", env: {}, page_rule?: false)
+    request = stub(no_cache?: false, cache_key: "/", env: {}, page_rule?: false)
     server_response = mock('server_response')
     null_cached_response = stub(must_be_revalidated?: false, fresh_for_request?: false)
     app = stub(call: [200, {}, "foo"])
@@ -36,7 +36,7 @@ class CacheControllerTest < MiniTest::Test
   end
 
   def test_response_when_request_no_cache_false_and_there_is_cached_version_and_must_be_revalidated
-    request = stub(no_cache?: false, path: "/", env: {}, page_rule?: false)
+    request = stub(no_cache?: false, cache_key: "/", env: {}, page_rule?: false)
     server_response = mock('server_response')
     cached_response = stub(must_be_revalidated?: true)
     app = stub(call: [200, {}, "foo"])
@@ -55,7 +55,7 @@ class CacheControllerTest < MiniTest::Test
   end
 
   def test_response_when_request_no_cache_false_and_there_is_cached_version_and_not_must_be_revalidated_and_isnt_fresh_for_request
-    request = stub(no_cache?: false, path: "/", env: {}, page_rule?: false)
+    request = stub(no_cache?: false, cache_key: "/", env: {}, page_rule?: false)
     server_response = mock('server_response')
     cached_response = stub(must_be_revalidated?: false, fresh_for_request?: false)
     app = stub(call: [200, {}, "foo"])
@@ -72,7 +72,7 @@ class CacheControllerTest < MiniTest::Test
   end
 
   def test_response_when_request_no_cache_false_and_there_is_cached_version_and_not_must_be_revalidated_and_is_fresh_for_request
-    request = stub(no_cache?: false, path: "/", env: {})
+    request = stub(no_cache?: false, cache_key: "/", env: {})
     cached_response = stub(must_be_revalidated?: false, fresh_for_request?: true)
     app = stub(call: [200, {}, "foo"])
     cache_maintenance = mock('cache_maintenance')
@@ -87,7 +87,7 @@ class CacheControllerTest < MiniTest::Test
   end
 
   def test_response_when_request_no_cache_true_and_page_rules_set
-    request = stub(no_cache?: true, env: {}, path: "/", page_rule?: true, page_rule: { acorn_cache_ttl: 30 })
+    request = stub(no_cache?: true, env: {}, cache_key: "/", page_rule?: true, page_rule: { acorn_cache_ttl: 30 })
     app = stub(call: [200, {}, "foo"])
     server_response = mock("server response")
 

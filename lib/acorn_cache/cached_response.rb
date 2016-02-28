@@ -42,9 +42,9 @@ class Rack::AcornCache
       headers["Last-Modified"]
     end
 
-    def update_date_and_recache!(request_path)
+    def update_date_and_recache!(cache_key)
       cached_response.update_date!
-      CacheWriter.write(request_path, cached_response.serialize)
+      CacheWriter.write(cache_key, cached_response.serialize)
       self
     end
 

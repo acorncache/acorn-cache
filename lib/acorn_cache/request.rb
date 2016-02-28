@@ -34,10 +34,12 @@ class Rack::AcornCache
     end
 
     def page_rule
-      @page_rule ||= 
-        config.page_rules.find(proc { return nil }) do |k, _|
-          key_matches_url?(k)
-        end.last
+      config.page_rule_for_url(url) if config
+    end
+
+    def cache_key
+      return base_url + path if page_rule? && page_rule[:ignore_query_params]
+      url
     end
 
     alias_method :page_rule?, :page_rule
@@ -46,12 +48,6 @@ class Rack::AcornCache
 
     def config
       Rack::AcornCache.configuration
-    end
-
-    def key_matches_url?(key)
-      return url =~ key if key.is_a?(Regexp)
-      string = key.gsub("*", ".*")
-      url =~ /^#{string}$/
     end
 
     def if_none_match=(etag)
