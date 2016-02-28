@@ -37,7 +37,7 @@ config.middleware.use "Rack::AcornCache"
 
 You should now see ```Rack::AcornCache``` listed in the middleware pipeline when you run `rake middleware`.
 
-AcornCache has a range of configuration options that can be configured both globally and on a page-to-page basis.  Create an initializer:
+AcornCache has a range of configuration options that can be configured both globally and on a page-by-page basis.  Create an initializer:
 
 ```
 config/initializers/acorn_cache.rb
@@ -50,7 +50,7 @@ Rack::AcornCache.configure do |config|
   config.cache_everything = true
   config.default_acorn_cache_ttl = 3600
   config.page_rules = {
-    "http://example.com/*.js" => { browser_cache_ttl: 30,
+    "http://example.com/*.js" => { browser_cache_ttl: 30 },
       "another_url" => { acorn_cache_ttl: 100 },
       "foo.com" => { respect_existing_headers: true }
     }
@@ -81,20 +81,20 @@ AcornCache provides you with three options for defining the urls that you want t
 
 * You can define a singular page explicitly:
 
-  `"http://www.foobar.com/baz" => acorn_cache_ttl: 100`
+  `"http://www.foobar.com/baz" => { acorn_cache_ttl: 100 }`
 
 * You can use wildcards to identify multiple pages for a which a given rule (or set of rules) applies:
 
-  `"http://foo*.com => browser_cache_ttl: 86400"`
+  `"http://foo*.com" => { browser_cache_ttl: 86400" }`
 * You can use a `Regexp`:
 
-  `/https?:\/\/[\S]+/ => respect_existing_headers: true`
+  `/https?:\/\/[\S]+/ => { respect_existing_headers: true }`
 
 In addition, AcornCache provides you with the ability to respect the cache control headers that were provided from the client or origin server.  This can be achieved by setting `respect_existing_headers: true` for a page or given set of pages.
 
 ## Further Information
 
-AcornCache's rules and caching guidelines strictly follow HTTP 1.1 protocols and RFC 2616 standards.  [This flow chart](http://i.imgur.com/o63TJAa.jpg) details the logic and rules that AcornCache is built upon.
+AcornCache's rules and caching guidelines strictly follow HTTP 1.1 protocols and RFC 2616 standards.  [This flow chart](http://i.imgur.com/o63TJAa.jpg) details the logic and rules that AcornCache is built upon and defines its default behavior.
 
 ## Contributing
 
