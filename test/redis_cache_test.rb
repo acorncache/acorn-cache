@@ -27,27 +27,27 @@ class RedisCacheTest < Minitest::Test
     Rack::AcornCache::Storage.remove_instance_variable(:@redis)
   end
 
-  def test_setup_new_memecached_connection
-    ENV["ACORNCACHE_MEMECACHED_URL"] = "host:port"
-    ENV["ACORNCACHE_MEMECACHED_USERNAME"] = "Ol' Pete"
-    ENV["ACORNCACHE_MEMECACHED_PASSWORD"] = "sneaky_pete"
+  def test_setup_new_memcached_connection
+    ENV["ACORNCACHE_MEMCACHED_URL"] = "host:port"
+    ENV["ACORNCACHE_MEMCACHED_USERNAME"] = "Ol' Pete"
+    ENV["ACORNCACHE_MEMCACHED_PASSWORD"] = "sneaky_pete"
 
-    Dalli::Client.expects(:new).with("host:port", username: "Ol' Pete", password: "sneaky_pete").returns("memecached")
+    Dalli::Client.expects(:new).with("host:port", username: "Ol' Pete", password: "sneaky_pete").returns("memcached")
 
-    assert_equal Rack::AcornCache::Storage.memecached, "memecached"
+    assert_equal Rack::AcornCache::Storage.memcached, "memcached"
 
-    Rack::AcornCache::Storage.remove_instance_variable(:@memecached)
+    Rack::AcornCache::Storage.remove_instance_variable(:@memcached)
   end
 
-  def test_setup_new_memecached_connection_without_username_and_password
-    ENV["ACORNCACHE_MEMECACHED_URL"] = "host:port"
-    ENV["ACORNCACHE_MEMECACHED_USERNAME"] = nil
-    ENV["ACORNCACHE_MEMECACHED_PASSWORD"] = nil
+  def test_setup_new_memcached_connection_without_username_and_password
+    ENV["ACORNCACHE_MEMCACHED_URL"] = "host:port"
+    ENV["ACORNCACHE_MEMCACHED_USERNAME"] = nil
+    ENV["ACORNCACHE_MEMCACHED_PASSWORD"] = nil
 
-    Dalli::Client.expects(:new).with("host:port", {}).returns("memecached")
+    Dalli::Client.expects(:new).with("host:port", {}).returns("memcached")
 
-    assert_equal Rack::AcornCache::Storage.memecached, "memecached"
+    assert_equal Rack::AcornCache::Storage.memcached, "memcached"
 
-    Rack::AcornCache::Storage.remove_instance_variable(:@memecached)
+    Rack::AcornCache::Storage.remove_instance_variable(:@memcached)
   end
 end

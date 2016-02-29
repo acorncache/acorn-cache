@@ -41,8 +41,8 @@ class Rack::AcornCache
     def storage=(storage_sym)
       if storage_sym == :redis
         Rack::AcornCache::Storage.redis
-      elsif storage_sym == :memecached
-        Rack::AcornCache::Storage.memecached
+      elsif storage_sym == :memcached
+        Rack::AcornCache::Storage.memcached
       end
     end
 

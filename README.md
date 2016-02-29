@@ -10,7 +10,7 @@ Features currently available include the following:
     * for how long, and
     * whether query params should be ignored
 * Allows for basic browser caching behavior modification by changing out cache control header directives.
-* Uses Redis or Memecached to store cached server responses.
+* Uses Redis or Memcached to store cached server responses.
 
 ##Getting Started
 
@@ -57,17 +57,17 @@ ACORNCAHE_REDIS_HOST="your_host_name"
 ACORNCACHE_REDIS_PORT="your_port_number"
 ACRONCACE_REDIS_PASSWORD="your_password"
 ```
-You may also choose to use memecached.  If so, set the URL (including host and
+You may also choose to use memcached.  If so, set the URL (including host and
 port) and, if you have SASL authentication username and password.
 
 ```
-ACORNCACHE_MEMECACHED_URL="your_url"
-ACORNCACHE_MEMECACHED_USERNAME="your_username"
-ACORNCACHE_MEMECACHED_PASSWORD="your_password"
+ACORNCACHE_MEMCACHED_URL="your_url"
+ACORNCACHE_MEMCACHED_USERNAME="your_username"
+ACORNCACHE_MEMCACHED_PASSWORD="your_password"
 ```
-To switch to Memecached, add the following line to your AcornCache config:
+To switch to Memcached, add the following line to your AcornCache config:
 ```ruby
-config.storage = :memecached
+config.storage = :memcached
 ```
 
 ####Configuration
