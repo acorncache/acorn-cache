@@ -13,15 +13,15 @@ class Rack::AcornCache
       @redis ||= Redis.new(args)
     end
 
-    def self.memecached
-      if ENV["ACORNCACHE_MEMECACHED_USERNAME"]
-        options = { username: ENV["ACORNCACHE_MEMECACHED_USERNAME"],
-                    password: ENV["ACORNCACHE_MEMECACHED_PASSWORD"] }
-      else
-        options = {}
+    def self.memcached
+      options = {}
+
+      if ENV["ACORNCACHE_MEMCACHED_USERNAME"]
+        options = { username: ENV["ACORNCACHE_MEMCACHED_USERNAME"],
+                    password: ENV["ACORNCACHE_MEMCACHED_PASSWORD"] }
       end
 
-      @memecached ||= Dalli::Client.new(ENV["ACORNCACHE_MEMECACHED_URL"], options)
+      @memcached ||= Dalli::Client.new(ENV["ACORNCACHE_MEMCACHED_URL"], options)
     end
   end
 end
