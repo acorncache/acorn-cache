@@ -34,4 +34,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "mocha"
   spec.add_runtime_dependency "rack", "~> 1.6"
   spec.add_runtime_dependency "redis"
+  spec.add_runtime_dependency "dalli"
 end

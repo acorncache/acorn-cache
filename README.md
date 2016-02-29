@@ -7,10 +7,10 @@ Features currently available include the following:
 * Honors origin server cache control directives according to RFC2616 standards unless directed otherwise.
 * Allows for easily configuring:
     * which resources should be cached,
-    * for how long, and 
+    * for how long, and
     * whether query params should be ignored
 * Allows for basic browser caching behavior modification by changing out cache control header directives.
-* Uses Redis to store cached server responses.
+* Uses Redis or Memecached to store cached server responses.
 
 ##Getting Started
 
@@ -56,6 +56,18 @@ your Redis host, port, and password (if you have one set) as environment variabl
 ACORNCAHE_REDIS_HOST="your_host_name"
 ACORNCACHE_REDIS_PORT="your_port_number"
 ACRONCACE_REDIS_PASSWORD="your_password"
+```
+You may also choose to use memecached.  If so, set the URL (including host and
+port) and, if you have SASL authentication username and password.
+
+```
+ACORNCACHE_MEMECACHED_URL="your_url"
+ACORNCACHE_MEMECACHED_USERNAME="your_username"
+ACORNCACHE_MEMECACHED_PASSWORD="your_password"
+```
+To switch to Memecached, add the following line to your AcornCache config:
+```ruby
+config.storage = :memecached
 ```
 
 ####Configuration

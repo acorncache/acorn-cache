@@ -9,12 +9,13 @@ class Rack::AcornCache
   end
 
   class Configuration
-    attr_reader :page_rules
+    attr_reader :page_rules, :storage
     attr_accessor :default_acorn_cache_ttl, :default_browser_cache_ttl,
       :cache_everything, :default_ignore_query_params
 
     def initialize
       @cache_everything = false
+      @storage = :redis
     end
 
     def page_rules=(user_page_rules)
@@ -35,6 +36,14 @@ class Rack::AcornCache
       page_rules.find(no_page_rule_found) do |k, _|
         page_rule_key_matches_url?(k, url)
       end.last
+    end
+
+    def storage=(storage_sym)
+      if storage_sym == :redis
+        Rack::AcornCache::Storage.redis
+      elsif storage_sym == :memecached
+        Rack::AcornCache::Storage.memecached
+      end
     end
 
     private
