@@ -4,6 +4,7 @@ require 'json'
 
 class Rack::AcornCache
   class ServerResponse < Rack::Response
+    CACHEABLE_STATUS_CODES = [200, 203, 300, 301, 302, 404, 410]
     attr_reader :status, :headers, :body, :cache_control_header
 
     def initialize(status, headers, body)
@@ -19,7 +20,7 @@ class Rack::AcornCache
 
     def cacheable?
       [:private?, :no_store?].none? { |directive| send(directive) } &&
-        status == 200
+        CACHEABLE_STATUS_CODES.include?(status)
     end
 
     def status_304?
