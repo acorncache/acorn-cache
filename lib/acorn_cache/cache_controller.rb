@@ -25,7 +25,7 @@ class Rack::AcornCache
       end
 
       CacheMaintenance
-        .new(request.path, server_response, cached_response)
+        .new(request.cache_key, server_response, cached_response)
         .update_cache
         .response
     end
@@ -41,11 +41,16 @@ class Rack::AcornCache
         raise AppException.new(e)
       end
 
-      ServerResponse.new(status, headers, body)
+      server_response = ServerResponse.new(status, headers, body)
+      if request.page_rule?
+        server_response.update_with_page_rules!(request.page_rule)
+      else
+        server_response
+      end
     end
 
     def check_for_cached_response
-      CacheReader.read(request.path) || NullCachedResponse.new
+      CacheReader.read(request.cache_key) || NullCachedResponse.new
     end
   end
 end

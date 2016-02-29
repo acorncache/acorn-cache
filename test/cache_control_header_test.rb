@@ -11,21 +11,13 @@ class CacheControlHeaderTest < MiniTest::Test
   def test_max_age_not_present
     header_string = "private"
     cache_control_header = Rack::AcornCache::CacheControlHeader.new(header_string)
-    assert_equal cache_control_header.max_age, nil
+    refute cache_control_header.max_age
   end
 
   def test_max_age_no_cache_control_header_present
     header_string = nil
     cache_control_header = Rack::AcornCache::CacheControlHeader.new(header_string)
-    assert_equal cache_control_header.max_age, nil
-  end
-
-  def test_max_age_not_well_formed
-    header_string = "max-age=foo"
-    cache_control_header = Rack::AcornCache::CacheControlHeader.new(header_string)
-    max_age = cache_control_header.max_age
-
-    assert_equal max_age, nil
+    refute cache_control_header.max_age
   end
 
   def test_s_max_age
@@ -106,5 +98,26 @@ class CacheControlHeaderTest < MiniTest::Test
     header_string = "max-stale"
     cache_control_header = Rack::AcornCache::CacheControlHeader.new(header_string)
     assert true, cache_control_header.max_stale?
+  end
+
+  def test_to_s_with_one_cache_control_directive
+    cache_control_header = Rack::AcornCache::CacheControlHeader.new
+    cache_control_header.max_age = 86400
+
+    assert_equal "max-age=86400", cache_control_header.to_s
+  end
+
+  def test_to_s_with_multiple_cache_control_directives
+    cache_control_header = Rack::AcornCache::CacheControlHeader.new
+    cache_control_header.max_age = 86400
+    cache_control_header.no_cache = true
+
+    assert_equal "max-age=86400, no-cache", cache_control_header.to_s
+  end
+
+  def test_to_s_with_unknown_cache_control_directive
+    cache_control_header = Rack::AcornCache::CacheControlHeader.new("foo=bar")
+
+    assert_equal "foo=bar", cache_control_header.to_s
   end
 end

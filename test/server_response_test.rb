@@ -104,9 +104,32 @@ class ServerResponseTest < Minitest::Test
     assert_equal [304, {"Cache-Control"=>"no-store"}, "test body"], result
   end
 
-  def test_cache!
+  def test_cache_updates_date
     server_response = Rack::AcornCache::ServerResponse.new(304, {"Cache-Control"=>"no-store"}, "test body")
+    server_response.expects(:serialize).returns("Hey look I'm serialized!")
+    Rack::AcornCache::CacheWriter.expects(:write).with("key", "Hey look I'm serialized!")
 
-    assert server_response
+    server_response.cache!("key")
+  end
+
+  def test_update_with_page_rules_when_directives_are_removed
+    page_rule = { acorn_cache_ttl: 30 }
+
+    headers = { "Cache-Control" => "private, no-cache, no-store, must_revalidate" }
+    response = Rack::AcornCache::ServerResponse.new(200, headers, "test body")
+
+    assert response.private?
+    assert response.no_cache?
+    assert response.no_store?
+    assert response.must_revalidate?
+
+    response.update_with_page_rules!(page_rule)
+
+    refute response.private?
+    refute response.no_cache?
+    refute response.no_store?
+    refute response.must_revalidate?
+
+    assert_equal 30, response.s_maxage
   end
 end
