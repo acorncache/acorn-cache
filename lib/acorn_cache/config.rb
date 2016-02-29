@@ -13,7 +13,7 @@ class Rack::AcornCache
   class Configuration
     attr_reader :page_rules, :storage
     attr_accessor :default_acorn_cache_ttl, :default_browser_cache_ttl,
-      :cache_everything, :default_ignore_query_params
+      :cache_everything, :default_ignore_query_params, :default_must_revalidate
 
     def initialize
       @cache_everything = false
@@ -53,7 +53,8 @@ class Rack::AcornCache
     def default_page_rule
       { acorn_cache_ttl: default_acorn_cache_ttl,
         browser_cache_ttl: default_browser_cache_ttl,
-        ignore_query_params: default_ignore_query_params }
+        ignore_query_params: default_ignore_query_params,
+        must_revalidate: default_must_revalidate }
     end
 
     def build_page_rule(options)

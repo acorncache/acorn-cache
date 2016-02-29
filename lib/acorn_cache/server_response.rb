@@ -48,6 +48,14 @@ class Rack::AcornCache
     end
 
     def update_with_page_rules!(page_rule)
+      if page_rule[:must_revalidate]
+        self.no_cache = true
+        self.must_revalidate = true
+        self.max_age = nil
+        self.s_max_age = nil
+        self.no_store = nil
+      end
+
       if page_rule[:acorn_cache_ttl] || page_rule[:browser_cache_ttl]
         self.no_cache = nil
         self.no_store = nil
