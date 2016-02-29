@@ -132,4 +132,51 @@ class ServerResponseTest < Minitest::Test
 
     assert_equal 30, response.s_maxage
   end
+
+  def test_update_with_page_rules_for_must_revalidate
+    page_rule = { must_revalidate: true }
+
+    headers = { "Cache-Control" => "no-store" }
+    response = Rack::AcornCache::ServerResponse.new(200, headers, "test body")
+
+    assert response.no_store?
+
+    response.update_with_page_rules!(page_rule)
+
+    assert response.must_revalidate?
+    assert response.no_cache?
+    refute response.no_store?
+  end
+
+  def test_update_with_page_rules_for_max_age
+    page_rule = { browser_cache_ttl: 30 }
+
+    headers = { "Cache-Control" => "no-cache, no-store" }
+    response = Rack::AcornCache::ServerResponse.new(200, headers, "test body")
+
+    assert response.no_store?
+    assert response.no_cache?
+
+    response.update_with_page_rules!(page_rule)
+
+    assert_equal 30, response.max_age
+    refute response.no_cache?
+    refute response.no_store?
+  end
+
+  def test_update_with_age_rules_for_s_maxage
+    page_rule = { acorn_cache_ttl: 30 }
+
+    headers = { "Cache-Control" => "no-cache, no-store" }
+    response = Rack::AcornCache::ServerResponse.new(200, headers, "test body")
+
+    assert response.no_store?
+    assert response.no_cache?
+
+    response.update_with_page_rules!(page_rule)
+
+    assert_equal 30, response.s_maxage
+    refute response.no_cache?
+    refute response.no_store?
+  end
 end

@@ -52,7 +52,7 @@ class Rack::AcornCache
         self.no_cache = true
         self.must_revalidate = true
         self.max_age = nil
-        self.s_max_age = nil
+        self.s_maxage = nil
         self.no_store = nil
       end
 

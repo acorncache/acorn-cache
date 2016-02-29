@@ -142,22 +142,22 @@ Suppose you don't know or want to change the cache control headers provided by y
 cached by both AcornCache and the browser cache simply by specifying the
 appropriate page rule settings.
 
-AcornCache provides three options, which can be set either as defaults or within
+AcornCache provides four options, which can be set either as defaults or within
 individual page rules.
 
-1. `acorn_cache_ttl`
+1. `acorn_cache_ttl` -
 This option specifies the time a resource should live in AcornCache before
 expiring.  It works by overriding the `s-maxage` directive in the cache control
 header with the specified value. Time should be given in seconds. It also removes any directives that would
 prevent caching in a shared proxy cache, like `private` or `no-store`.
 
-2. `browser_cache_ttl`
+2. `browser_cache_ttl` -
 This option specifies the time in seconds a resource should live in private
 browser caches before expiring.  It works by overriding the `max-age` directive
 in the cache control header with the specified value.  It also removes any
 directives that would prevent caching in a private cache, like `no-store`.
 
-3. `ignore-query-params`
+3. `ignore_query_params` -
 If the query params in a request shouldn't effect the response from your server,
 you can set this option to `true` so that all requests for a URL, regardless of
 the specified params, share the same cache entry. This means that if a resource
@@ -165,7 +165,10 @@ living at `http://foo.com` is cached with AcornCache, a request to
 `http://foo.com/?bar=baz` will respond with that cached resource without creating another
 cache entry.
 
-These three options can be set either as defaults or for individual page rules.
+4. `must_revalidate` -
+When set to `true`, it will override the ability to serve stale content.  With this configuration, AcornCache will not use a cache entry after it becomes stale without first revalidating it with the origin server.
+
+These four options can be set either as defaults or for individual page rules.
 Default settings apply to any page that AcornCache is allowed to cache unless
 they are overwritten by a page rule. For example, if your
 config looks like this...
