@@ -1,5 +1,5 @@
 require 'minitest/autorun'
-require 'acorn_cache/redis_cache'
+require 'acorn_cache/storage'
 require 'mocha/mini_test'
 
 class RedisCacheTest < Minitest::Test

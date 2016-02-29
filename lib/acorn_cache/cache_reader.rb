@@ -1,5 +1,4 @@
 require 'acorn_cache/cached_response'
-require 'acorn_cache/redis_cache'
 require 'rack'
 require 'json'
 
