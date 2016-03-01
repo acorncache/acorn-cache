@@ -1,7 +1,5 @@
-require 'acorn_cache/cache_control_header'
-require 'acorn_cache/cache_writer'
 require 'forwardable'
-require 'acorn_cache/freshness_rules'
+require 'time'
 
 class Rack::AcornCache
   class CachedResponse

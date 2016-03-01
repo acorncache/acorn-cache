@@ -1,8 +1,3 @@
-require 'acorn_cache/cache_reader'
-require 'acorn_cache/cache_maintenance'
-require 'acorn_cache/server_response'
-require 'acorn_cache/cached_response'
-
 class Rack::AcornCache
   class CacheController
     def initialize(request, app)

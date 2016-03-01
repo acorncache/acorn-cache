@@ -1,7 +1,3 @@
-require 'acorn_cache/request'
-require 'acorn_cache/cache_controller'
-require 'acorn_cache/app_exception'
-require 'acorn_cache/config'
 require 'rack'
 
 class Rack::AcornCache
@@ -26,3 +22,16 @@ class Rack::AcornCache
     end
   end
 end
+
+require 'acorn_cache/request'
+require 'acorn_cache/cache_controller'
+require 'acorn_cache/app_exception'
+require 'acorn_cache/config'
+require 'acorn_cache/cache_control_header'
+require 'acorn_cache/cache_writer'
+require 'acorn_cache/freshness_rules'
+require 'acorn_cache/storage'
+require 'acorn_cache/cache_maintenance'
+require 'acorn_cache/server_response'
+require 'acorn_cache/cached_response'
+require 'acorn_cache/cache_reader'

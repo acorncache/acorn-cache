@@ -1,5 +1,3 @@
-require 'acorn_cache/cached_response'
-require 'rack'
 require 'json'
 
 class Rack::AcornCache
