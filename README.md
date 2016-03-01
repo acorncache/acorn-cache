@@ -11,7 +11,7 @@ Features currently available include the following:
     * whether query params should be ignored
 * Allows for basic browser caching behavior modification by changing out cache control header directives.
 * Uses Redis or Memcached to store cached server responses.
-* Adds custom header to mark responses returned from the cache (`X-Acorn-Cache: HIT`)
+* Adds a custom header to mark responses returned from the cache (`X-Acorn-Cache: HIT`)
 
 ##Getting Started
 
@@ -59,7 +59,7 @@ ACORNCACHE_REDIS_PORT="your_port_number"
 ACORNCACHE_REDIS_PASSWORD="your_password"
 ```
 You may also choose to use memcached.  If so, set the URL (including host and
-port) and, if you have SASL authentication username and password.
+port) and, if you have SASL authentication, username and password.
 
 ```
 ACORNCACHE_MEMCACHED_URL="your_url"
@@ -103,7 +103,7 @@ config.cache_everything = true
 ```
 Keep in mind that you can override standard caching behavior even when in cache everything mode by specifying a page rule.
 
-See below for all the available options.
+See below for all available options.
 
 ## Page Rules
 Configuration options can be set for individual URLs via the
@@ -164,7 +164,7 @@ in the cache control header with the specified value.  It also removes any
 directives that would prevent caching in a private cache, like `no-store`.
 
 3. `ignore_query_params` -
-If the query params in a request shouldn't effect the response from your server,
+If the query params in a request shouldn't affect the response from your server,
 you can set this option to `true` so that all requests for a URL, regardless of
 the specified params, share the same cache entry. This means that if a resource
 living at `http://foo.com` is cached with AcornCache, a request to
@@ -181,19 +181,17 @@ config looks like this...
 
 ```ruby
 RackAcornCache.configure do |config|
-  if Rails.env.production?
-    config.default_acorn_cache_ttl = 30
-    config.page_rules = {
-     "http://foo.com" => { use_defaults: true }
-     "http://bar.com" => { acorn_cache_ttl: 100 }
-  end
+ config.default_acorn_cache_ttl = 30
+ config.page_rules = {
+  "http://foo.com" => { use_defaults: true }
+  "http://bar.com" => { acorn_cache_ttl: 100 }
 end
 ```
 
 ...then the server response returned by a request to `foo.com` will be cached in AcornCache for 30 seconds, but the server response returned by a request to `bar.com` will be cached for 100 seconds.
 
 #####Respect Existing Cache Control Headers
-AcornCache provides you with the ability to respect the cache control headers that were provided from the client or origin server.  This can be achieved by setting `respect_existing_headers: true` for a page or given set of pages. This option is useful when you don't want to cache everything but you also want to control caching behavior by ensuring that responses come from your server with the proper cache control headers.  If you choose this option, you will likely want to ensure your response has an `s-maxage` directive, as AcornCache operates as a shared cache.
+AcornCache provides you with the ability to respect the cache control headers that were provided from the client or origin server.  This can be achieved by setting `respect_existing_headers: true` for a page or given set of pages. This option is useful when you don't want to cache everything but you also want to control caching behavior by ensuring that responses come from your server with the proper cache control headers.  If you choose this option, you will likely want to ensure that your response has an `s-maxage` directive, as AcornCache operates as a shared cache.
 
 ## Further Information
 
