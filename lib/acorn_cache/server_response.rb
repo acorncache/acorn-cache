@@ -62,6 +62,7 @@ class Rack::AcornCache
       end
 
       if page_rule[:acorn_cache_ttl]
+        self.max_age = nil
         self.s_maxage = page_rule[:acorn_cache_ttl]
         self.private = nil
       end
