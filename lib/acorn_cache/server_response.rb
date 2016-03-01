@@ -1,6 +1,5 @@
-require 'acorn_cache/cache_control_header'
-require 'acorn_cache/cache_writer'
 require 'json'
+require 'time'
 
 class Rack::AcornCache
   class ServerResponse < Rack::Response

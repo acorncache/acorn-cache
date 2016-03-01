@@ -1,7 +1,4 @@
-require 'rack/request'
-require 'acorn_cache/cache_control_header'
 require 'forwardable'
-require 'acorn_cache/config'
 
 class Rack::AcornCache
   class Request < Rack::Request

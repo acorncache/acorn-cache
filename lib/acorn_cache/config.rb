@@ -1,5 +1,3 @@
-require 'acorn_cache/storage'
-
 class Rack::AcornCache
   class << self
     attr_accessor :configuration
