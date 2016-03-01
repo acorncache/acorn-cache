@@ -7,7 +7,7 @@ class Rack::AcornCache
   class Request < Rack::Request
     extend Forwardable
     def_delegators :@cache_control_header, :no_cache?, :max_age, :max_fresh,
-                   :max_stale
+                   :max_stale, :max_stale?
 
     def initialize(env)
       super

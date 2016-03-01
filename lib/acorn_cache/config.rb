@@ -11,7 +11,8 @@ class Rack::AcornCache
   end
 
   class Configuration
-    attr_reader :page_rules, :storage
+    attr_writer :storage
+    attr_reader :page_rules
     attr_accessor :default_acorn_cache_ttl, :default_browser_cache_ttl,
       :cache_everything, :default_ignore_query_params, :default_must_revalidate
 
@@ -40,10 +41,10 @@ class Rack::AcornCache
       end.last
     end
 
-    def storage=(storage_sym)
-      if storage_sym == :redis
+    def storage
+      if @storage == :redis
         Rack::AcornCache::Storage.redis
-      elsif storage_sym == :memcached
+      elsif @storage == :memcached
         Rack::AcornCache::Storage.memcached
       end
     end

@@ -21,8 +21,9 @@ class Rack::AcornCache
         directive = ivar.to_s.sub("@", "").sub("_", "-")
         value = instance_variable_get(ivar)
         next directive if value == true
+        next unless value
         "#{directive}=#{value}"
-      end.sort.join(", ")
+      end.compact.sort.join(", ")
     end
 
     private

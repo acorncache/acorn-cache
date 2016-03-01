@@ -20,6 +20,8 @@ class Rack::AcornCache
       else
         @response = server_response
       end
+
+      self
     end
   end
 end

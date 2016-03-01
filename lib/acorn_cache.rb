@@ -21,7 +21,8 @@ class Rack::AcornCache
       CacheController.new(request, @app).response.to_a
     rescue AppException => e
       raise e.caught_exception
-    rescue
+    rescue => e
+require 'pry'; binding.pry
       @app.call(env)
     end
   end

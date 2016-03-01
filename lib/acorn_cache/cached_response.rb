@@ -96,7 +96,7 @@ class Rack::AcornCache
     end
 
     def fresh_for_request?(request)
-      FreshnessRules.cached_response_fresh_for_request?(request, self)
+      FreshnessRules.cached_response_fresh_for_request?(self, request)
     end
 
     private
