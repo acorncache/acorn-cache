@@ -37,6 +37,7 @@ class Rack::AcornCache
       end
 
       server_response = ServerResponse.new(status, headers, body)
+
       if request.page_rule?
         server_response.update_with_page_rules!(request.page_rule)
       else

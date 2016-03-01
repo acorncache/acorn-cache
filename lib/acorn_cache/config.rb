@@ -59,7 +59,7 @@ class Rack::AcornCache
     def build_page_rule(options)
       options[:ignore_query_params] = default_ignore_query_params
 
-      return options if options[:respect_existing_headers]
+      return options if options[:respect_existing_headers] || options[:must_revalidate]
       { acorn_cache_ttl: default_acorn_cache_ttl,
         browser_cache_ttl: default_browser_cache_ttl }.merge(options)
     end
