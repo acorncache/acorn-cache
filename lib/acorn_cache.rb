@@ -22,7 +22,6 @@ class Rack::AcornCache
     rescue AppException => e
       raise e.caught_exception
     rescue => e
-require 'pry'; binding.pry
       @app.call(env)
     end
   end
