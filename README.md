@@ -1,4 +1,4 @@
-![AcornCache](http://i.imgur.com/6zdrz8A.png)
+![AcornCache](http://i.imgur.com/6zdrz8A.png?1)
 
 AcornCache is a Ruby HTTP proxy caching library that is lightweight, configurable and can be easily integrated with any Rack-based web application. AcornCache allows you to improve page load times and lighten the load on your server by allowing you to implement an in-memory cache shared by every client requesting a resource on your server.
 
