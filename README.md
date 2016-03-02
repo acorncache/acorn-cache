@@ -185,6 +185,7 @@ RackAcornCache.configure do |config|
  config.page_rules = {
   "http://foo.com" => { use_defaults: true }
   "http://bar.com" => { acorn_cache_ttl: 100 }
+ }
 end
 ```
 
