@@ -26,6 +26,10 @@ class Rack::AcornCache
       status == 304
     end
 
+    def etag_header
+      headers["ETag"]
+    end
+
     def serialize
       { status: status, headers: headers, body: body_string }.to_json
     end

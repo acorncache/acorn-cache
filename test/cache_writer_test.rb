@@ -10,5 +10,7 @@ class CacheWriterTest < Minitest::Test
     Rack::AcornCache.configuration.expects(:storage).returns(storage)
 
     assert_equal Rack::AcornCache::CacheWriter.write("path", "response"), "OK"
+
+    Rack::AcornCache.configuration = nil
   end
 end

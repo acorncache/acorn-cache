@@ -53,4 +53,8 @@ class ConfigurationTest < Minitest::Test
     config.page_rules = user_page_rules
     refute config.page_rules["http://foo.com"][:acorn_cache_ttl]
   end
+
+  def teardown
+    Rack::AcornCache.configuration = nil
+  end
 end

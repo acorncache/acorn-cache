@@ -2,7 +2,7 @@ require 'minitest/autorun'
 require 'acorn_cache/storage'
 require 'mocha/mini_test'
 
-class RedisCacheTest < Minitest::Test
+class StorageTest < Minitest::Test
   def test_setup_new_redis_connection
     ENV["ACORNCACHE_REDIS_HOST"] = "Some Host"
     ENV["ACORNCACHE_REDIS_PORT"] = "1234"
@@ -13,6 +13,7 @@ class RedisCacheTest < Minitest::Test
     assert_equal Rack::AcornCache::Storage.redis, "redis connection"
 
     Rack::AcornCache::Storage.remove_instance_variable(:@redis)
+    Redis.unstub(:new)
   end
 
   def test_setup_new_redis_connection_without_password
@@ -25,6 +26,8 @@ class RedisCacheTest < Minitest::Test
     assert_equal Rack::AcornCache::Storage.redis, "redis"
 
     Rack::AcornCache::Storage.remove_instance_variable(:@redis)
+
+    Redis.unstub(:new)
   end
 
   def test_setup_new_memcached_connection
@@ -49,5 +52,9 @@ class RedisCacheTest < Minitest::Test
     assert_equal Rack::AcornCache::Storage.memcached, "memcached"
 
     Rack::AcornCache::Storage.remove_instance_variable(:@memcached)
+  end
+
+  def teardown
+    Redis.unstub(:new)
   end
 end

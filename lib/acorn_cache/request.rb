@@ -31,7 +31,7 @@ class Rack::AcornCache
     end
 
     def page_rule
-      config.page_rule_for_url(url) if config
+      @page_rule ||= config.page_rule_for_url(url) if config
     end
 
     def cache_key

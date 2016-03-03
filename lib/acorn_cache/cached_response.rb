@@ -64,7 +64,7 @@ class Rack::AcornCache
     end
 
     def time_to_live
-      s_maxage || max_age || (expiration_header_time - date)
+      s_maxage || max_age || (expiration_date - date)
     end
 
     alias_method :stale_time_specified?, :time_to_live
