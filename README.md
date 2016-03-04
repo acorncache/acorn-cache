@@ -87,7 +87,7 @@ if Rails.env.production?
   Rack::AcornCache.configure do |config|  
     config.page_rules = {
       "http://example.com/" => { browser_cache_ttl: 30 },
-      "http://foo.com/bar" => { acorn_cache_ttl: 100 },
+      "http://foo.com/bar"  => { acorn_cache_ttl: 100 }
     }
   end
 end
@@ -112,10 +112,10 @@ Configuration options can be set for individual URLs via the
 ```ruby
 Rack::AcornCache.configure do |config|
   config.page_rules = {
-    { "http://foo.com" => { acorn_cache_ttl: 3600,
-                            browser_cache_ttl: 800,
-      "http://bar.com/*" => { browser_cache_ttl: 3600,
-                              ignore_query_params: true },
+    { "http://foo.com"      => { acorn_cache_ttl: 3600,
+                                 browser_cache_ttl: 800 },
+      "http://bar.com/*"    => { browser_cache_ttl: 3600,
+                                 ignore_query_params: true },
       /^https+:\/\/.+\.com/ => { respect_default_header: true,
                                  ignore_query_params: true }
     }
@@ -183,7 +183,7 @@ config looks like this...
 RackAcornCache.configure do |config|
  config.default_acorn_cache_ttl = 30
  config.page_rules = {
-  "http://foo.com" => { use_defaults: true }
+  "http://foo.com" => { use_defaults: true },
   "http://bar.com" => { acorn_cache_ttl: 100 }
  }
 end
