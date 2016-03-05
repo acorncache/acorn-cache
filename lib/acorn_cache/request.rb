@@ -35,8 +35,10 @@ class Rack::AcornCache
     end
 
     def cache_key
-      return base_url + path if page_rule? && page_rule[:ignore_query_params]
-      url
+      key = base_url + path if page_rule? && page_rule[:ignore_query_params]
+      key = url unless key
+      key + "/" unless key[-1] == "/"
+      key
     end
 
     alias_method :page_rule?, :page_rule
