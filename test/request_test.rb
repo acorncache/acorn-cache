@@ -237,7 +237,7 @@ class RequestTest < Minitest::Test
     request = Rack::AcornCache::Request.new({})
     request.stubs(:url).returns("http://foo.com/bar?baz=true")
 
-    assert_equal "http://foo.com/bar?baz=true", request.cache_key
+    assert_equal "http://foo.com/bar?baz=true/", request.cache_key
   end
 
   def test_cache_key_when_defualt_ignore_query_params_set
@@ -255,7 +255,7 @@ class RequestTest < Minitest::Test
     request = Rack::AcornCache::Request.new(env)
 
     assert_equal "http://foo.com/bar?baz=true", request.url
-    assert_equal "http://foo.com/bar", request.cache_key
+    assert_equal "http://foo.com/bar/", request.cache_key
   end
 
   def teardown
