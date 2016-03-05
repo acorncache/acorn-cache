@@ -1,12 +1,18 @@
 class Rack::AcornCache
-  module CacheWriter
-    def self.write(cache_key, serialized_response)
+  class CacheWriter
+    include Concurrent::Async
+
+    def initialize
+      super
+    end
+
+    def write(cache_key, serialized_response)
       storage.set(cache_key, serialized_response)
     end
 
     private
 
-    def self.storage
+    def storage
       Rack::AcornCache.configuration.storage
     end
   end

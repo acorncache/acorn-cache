@@ -3,6 +3,7 @@ require 'time'
 
 class Rack::AcornCache
   class ServerResponse < Rack::Response
+
     CACHEABLE_STATUS_CODES = [200, 203, 300, 301, 302, 404, 410]
     attr_reader :status, :headers, :body, :cache_control_header
 
@@ -42,7 +43,7 @@ class Rack::AcornCache
 
     def cache!(cache_key)
       update_date!
-      CacheWriter.write(cache_key, serialize)
+      CacheWriter.new.async.write(cache_key, serialize)
       self
     end
 

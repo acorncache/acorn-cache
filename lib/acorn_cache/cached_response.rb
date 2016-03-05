@@ -42,7 +42,7 @@ class Rack::AcornCache
 
     def update_date_and_recache!(cache_key)
       cached_response.update_date!
-      CacheWriter.write(cache_key, cached_response.serialize)
+      CacheWriter.new.async.write(cache_key, cached_response.serialize)
       self
     end
 
