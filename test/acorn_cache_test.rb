@@ -147,7 +147,7 @@ class AcornCacheTest < Minitest::Test
 
   def test_cached_response_expired_server_response_cacheable
     app = mock("app")
-    env = Rack::MockRequest.env_for("http://foo.com")
+    env = Rack::MockRequest.env_for("http://foo.com/")
     env["REQUEST_METHOD"] = "GET"
 
     redis = mock("redis")
@@ -172,12 +172,12 @@ class AcornCacheTest < Minitest::Test
     redis.expects(:set).with('http://foo.com/', serialized_response)
 
     result = acorn_cache.call(env)
-    assert_equal response, result
+    assert_equal [200, {"Cache-Control"=>"max-age=45, s-maxage=30", "Date"=>"Fri, 01 Jan 2016 05:00:00 GMT"}, ["foo"]], result
   end
 
   def test_cached_response_expired_server_response_not_cacheable
     app = mock("app")
-    env = Rack::MockRequest.env_for("http://foo.com")
+    env = Rack::MockRequest.env_for("http://foo.com/")
     env["REQUEST_METHOD"] = "GET"
 
     redis = mock("redis")
