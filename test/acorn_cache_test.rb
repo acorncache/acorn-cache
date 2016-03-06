@@ -1,6 +1,7 @@
 require 'acorn_cache'
 require 'minitest/autorun'
 require 'mocha/mini_test'
+require 'time'
 
 class AcornCacheTest < Minitest::Test
   def test_call_returns_app_if_request_is_not_a_get
@@ -55,7 +56,7 @@ class AcornCacheTest < Minitest::Test
 
   def test_when_request_is_not_get
     app = mock("app")
-    env = Rack::MockRequest.env_for("http://foo.com")
+    env = Rack::MockRequest.env_for("http://foo.com/")
     env["REQUEST_METHOD"] = "POST"
     app.stubs(:call).with(env).returns([200, {}, ["foo"]])
 
@@ -66,7 +67,7 @@ class AcornCacheTest < Minitest::Test
 
   def test_cache_not_checked_unless_page_rule_set
     app = mock("app")
-    env = Rack::MockRequest.env_for("http://foo.com")
+    env = Rack::MockRequest.env_for("http://foo.com/")
     env["REQUEST_METHOD"] = "GET"
     app.stubs(:call).with(env).returns([200, {}, ["foo"]])
 
@@ -74,7 +75,7 @@ class AcornCacheTest < Minitest::Test
 
     Rack::AcornCache.configure do |config|
       config.page_rules = {
-        "http://bar.com" => { acorn_cache_ttl: 30 }
+        "http://bar.com/" => { acorn_cache_ttl: 30 }
       }
     end
 
@@ -84,7 +85,7 @@ class AcornCacheTest < Minitest::Test
 
   def test_cache_not_checked_unless_page_rule_set
     app = mock("app")
-    env = Rack::MockRequest.env_for("http://foo.com")
+    env = Rack::MockRequest.env_for("http://foo.com/")
     env["REQUEST_METHOD"] = "GET"
     app.stubs(:call).with(env).returns([200, {}, ["foo"]])
 
@@ -92,7 +93,7 @@ class AcornCacheTest < Minitest::Test
 
     Rack::AcornCache.configure do |config|
       config.page_rules = {
-        "http://bar.com" => { acorn_cache_ttl: 30 }
+        "http://bar.com/" => { acorn_cache_ttl: 30 }
       }
     end
 
@@ -102,7 +103,7 @@ class AcornCacheTest < Minitest::Test
 
   def test_cache_checked_when_cache_everything_set_and_no_cached_repsonse
     app = mock("app")
-    env = Rack::MockRequest.env_for("http://foo.com")
+    env = Rack::MockRequest.env_for("http://foo.com/")
     env["REQUEST_METHOD"] = "GET"
     response = ([200, {"Cache-Control" => "no-store" }, ["foo"]])
     app.stubs(:call).with(env).returns(response)
@@ -122,7 +123,7 @@ class AcornCacheTest < Minitest::Test
 
   def test_cached_response_fresh
     app = mock("app")
-    env = Rack::MockRequest.env_for("http://foo.com")
+    env = Rack::MockRequest.env_for("http://foo.com/")
     env["REQUEST_METHOD"] = "GET"
 
     redis = mock("redis")
