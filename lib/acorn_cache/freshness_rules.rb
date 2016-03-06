@@ -4,15 +4,15 @@ class Rack::AcornCache
       return false unless cached_response
       if cached_response.fresh?
         if request.max_age_more_restrictive?(cached_response)
-          return cached_response.date + request.max_age >= Time.now
+          return cached_response.date + request.max_age >= Time.now.gmtime
         elsif request.max_fresh
-          return cached_response.expiration_date - request.max_fresh >= Time.now
+          return cached_response.expiration_date - request.max_fresh >= Time.now.gmtime
         end
         true
       else
         return false unless request.max_stale?
         return true if request.max_stale == true
-        cached_response.expiration_date + request.max_stale >= Time.now
+        cached_response.expiration_date + request.max_stale >= Time.now.gmtime
       end
     end
   end
