@@ -152,7 +152,7 @@ class AcornCacheTest < Minitest::Test
     env["REQUEST_METHOD"] = "GET"
 
     redis = mock("redis")
-    serialized_cached_response = "{\"status\":200,\"headers\":{\"Date\":\"Fri, 01 Jan 2016 04:50:00 GMT\",\"Cache-Control\":\"max-age=0\"},\"body\":\"foo\"}"
+    serialized_cached_response = "{\"status\":200,\"headers\":{\"Date\":\"Fri, 12 Dec 2015 00:00:00 GMT\",\"Cache-Control\":\"max-age=0\"},\"body\":\"foo\"}"
     redis.stubs(:get).returns(serialized_cached_response)
     Redis.stubs(:new).returns(redis)
     Time.stubs(:now).returns(Time.new(2016))
