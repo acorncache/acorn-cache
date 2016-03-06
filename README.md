@@ -116,7 +116,7 @@ Rack::AcornCache.configure do |config|
                                  browser_cache_ttl: 800 },
       "http://bar.com/*"    => { browser_cache_ttl: 3600,
                                  ignore_query_params: true },
-      /^https+:\/\/.+\.com/ => { respect_default_header: true,
+      /^https+:\/\/.+\.com/ => { respect_existing_headers: true,
                                  ignore_query_params: true }
     }
 end
