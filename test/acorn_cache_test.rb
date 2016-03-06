@@ -139,7 +139,7 @@ class AcornCacheTest < Minitest::Test
       }
     end
 
-    response = [200, { "Date" => Time.new(2016).httpdate, "Cache-Control" => "max-age=30", "X-Acorn-Cache" => "HIT" }, ["foo"] ]
+    response = [200, { "Date" => "Fri, 01 Jan 2016 05:00:00 GMT", "Cache-Control" => "max-age=30", "X-Acorn-Cache" => "HIT" }, ["foo"] ]
 
     result = acorn_cache.call(env)
     assert_equal response, result
@@ -151,7 +151,7 @@ class AcornCacheTest < Minitest::Test
     env["REQUEST_METHOD"] = "GET"
 
     redis = mock("redis")
-    serialized_cached_response = "{\"status\":200,\"headers\":{\"Date\":\"Fri, 01 Jan 2016 05:00:00 GMT\",\"Cache-Control\":\"max-age=0\"},\"body\":\"foo\"}"
+    serialized_cached_response = "{\"status\":200,\"headers\":{\"Date\":\"Fri, 01 Jan 2016 04:50:00 GMT\",\"Cache-Control\":\"max-age=0\"},\"body\":\"foo\"}"
     redis.stubs(:get).returns(serialized_cached_response)
     Redis.stubs(:new).returns(redis)
     Time.stubs(:now).returns(Time.new(2016))
@@ -181,7 +181,7 @@ class AcornCacheTest < Minitest::Test
     env["REQUEST_METHOD"] = "GET"
 
     redis = mock("redis")
-    serialized_cached_response = "{\"status\":200,\"headers\":{\"Date\":\"Fri, 01 Jan 2016 05:00:00 GMT\",\"Cache-Control\":\"max-age=0\"},\"body\":\"foo\"}"
+    serialized_cached_response = "{\"status\":200,\"headers\":{\"Date\":\"Fri, 01 Jan 2016 04:59:00:00 GMT\",\"Cache-Control\":\"max-age=0\"},\"body\":\"foo\"}"
     redis.stubs(:get).returns(serialized_cached_response)
     Redis.stubs(:new).returns(redis)
     Time.stubs(:now).returns(Time.new(2016))
