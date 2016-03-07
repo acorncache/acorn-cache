@@ -179,4 +179,14 @@ class ServerResponseTest < Minitest::Test
     refute response.no_cache?
     refute response.no_store?
   end
+
+  def test_cache_deletes_cookie
+    headers = { "Set-Cookie" => "foo=bar"}
+    response = Rack::AcornCache::ServerResponse.new(200, headers, ["test body"])
+    Rack::AcornCache::CacheWriter.stubs(:write)
+
+    response.cache!("foo")
+
+    refute response.headers["Set-Cookie"]
+  end
 end

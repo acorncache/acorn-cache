@@ -46,6 +46,7 @@ class Rack::AcornCache
 
     def cache!(cache_key)
       update_date!
+      headers.delete("Set-Cookie")
       CacheWriter.write(cache_key, serialize)
       self
     end
