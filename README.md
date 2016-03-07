@@ -12,6 +12,7 @@ Features currently available include the following:
 * Allows for basic browser caching behavior modification by changing out cache control header directives.
 * Uses Redis or Memcached to store cached server responses.
 * Adds a custom header to mark responses returned from the cache (`X-Acorn-Cache: HIT`)
+* Removes cookies from server responses prior to caching.
 
 ##Getting Started
 

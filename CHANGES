@@ -1,0 +1,7 @@
+0.1.0
+  - Initial release
+0.1.1
+  - Add ServerResponse#etag_header
+  - Fixed bug in CachedResponse#time_to_live
+0.2.0
+  - Add feature to remove cookies from server responses prior to caching
