@@ -87,8 +87,8 @@ The config below specifies two URLs to cache and specifies the time to live, i.e
 if Rails.env.production?
   Rack::AcornCache.configure do |config|  
     config.page_rules = {
-      "http://example.com/" => { browser_cache_ttl: 30 },
-      "http://foo.com/bar"  => { acorn_cache_ttl: 100 }
+      "http://foo.com/"    => { browser_cache_ttl: 30 },
+      "http://foo.com/bar" => { acorn_cache_ttl: 100 }
     }
   end
 end
@@ -113,13 +113,13 @@ Configuration options can be set for individual URLs via the
 ```ruby
 Rack::AcornCache.configure do |config|
   config.page_rules = {
-    { "http://foo.com"      => { acorn_cache_ttl: 3600,
-                                 browser_cache_ttl: 800 },
-      "http://bar.com/*"    => { browser_cache_ttl: 3600,
-                                 ignore_query_params: true },
-      /^https+:\/\/.+\.com/ => { respect_existing_headers: true,
-                                 ignore_query_params: true }
-    }
+    "http://foo.com/"            => { acorn_cache_ttl: 1800,
+                                      browser_cache_ttl: 800 },
+    "http://foo.com/helpcenter*" => { browser_cache_ttl: 3600,
+                                      ignore_query_params: true },
+    /^https?:\/\/.+\.com/        => { respect_default_header: true,
+                                      ignore_query_params: true }
+  }
 end
 ```
 ####Deciding Which Resources Are Cached
@@ -128,18 +128,18 @@ AcornCache provides you with three options for defining the URLs for the resourc
 
 1. You can define a single URL explicitly:
    ```ruby
-   "http://www.foobar.com/baz" => { acorn_cache_ttl: 100 }
+   "http://foo.com/" => { acorn_cache_ttl: 100 }
    ```
 
 2. You can use wildcards to identify multiple pages for a which a given set of rules applies:
    ```ruby
-   "http://foo*.com" => { browser_cache_ttl: 86400 }
+   "http://foo.com/helpcenter*" => { browser_cache_ttl: 86400 }
    ```
 
 3. You can use regex pattern matching simply by using a `Regexp` object as the
   key:
    ```ruby
-   /^https+:\/\/.+\.com/ => { acorn_cache_ttl: 100 }
+   /^https?:\/\/.+\.com/ => { acorn_cache_ttl: 100 }
    ```
 
 
@@ -184,13 +184,13 @@ config looks like this...
 RackAcornCache.configure do |config|
  config.default_acorn_cache_ttl = 30
  config.page_rules = {
-  "http://foo.com" => { use_defaults: true },
-  "http://bar.com" => { acorn_cache_ttl: 100 }
+  "http://foo.com/" => { use_defaults: true },
+  "http://foo.com/helpdocs" => { acorn_cache_ttl: 100 }
  }
 end
 ```
 
-...then the server response returned by a request to `foo.com` will be cached in AcornCache for 30 seconds, but the server response returned by a request to `bar.com` will be cached for 100 seconds.
+...then the server response returned by a request to `foo.com/` will be cached in AcornCache for 30 seconds, but the server response returned by a request to `foo.com/helpdocs` will be cached for 100 seconds.
 
 #####Respect Existing Cache Control Headers
 AcornCache provides you with the ability to respect the cache control headers that were provided from the client or origin server.  This can be achieved by setting `respect_existing_headers: true` for a page or given set of pages. This option is useful when you don't want to cache everything but you also want to control caching behavior by ensuring that responses come from your server with the proper cache control headers.  If you choose this option, you will likely want to ensure that your response has an `s-maxage` directive, as AcornCache operates as a shared cache.
