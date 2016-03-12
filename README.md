@@ -16,6 +16,8 @@ Features currently available include the following:
 
 ##Getting Started
 
+[![Join the chat at https://gitter.im/acorncache/acorn-cache](https://badges.gitter.im/acorncache/acorn-cache.svg)](https://gitter.im/acorncache/acorn-cache?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ####Installation
 
 Add this line to your application's Gemfile:
