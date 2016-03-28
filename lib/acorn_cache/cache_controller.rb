@@ -16,6 +16,10 @@ class Rack::AcornCache
           server_response = get_response_from_server
         elsif !cached_response.fresh_for_request?(request)
           server_response = get_response_from_server
+        elsif request.conditional?
+          if cached_response.not_modified_for?(request)
+            return not_modified(cached_response)
+          end
         end
       end
 
@@ -47,6 +51,17 @@ class Rack::AcornCache
 
     def check_for_cached_response
       CacheReader.read(request.cache_key) || NullCachedResponse.new
+    end
+
+    def not_modified(cached_response)
+      status = 304
+
+      headers = cached_response.headers
+      headers.delete("Content-Type")
+      headers.delete("Content-Length")
+
+      body = []
+      [status, headers, body]
     end
   end
 end

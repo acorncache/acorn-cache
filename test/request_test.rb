@@ -1,5 +1,6 @@
 require 'acorn_cache/request'
 require 'minitest/autorun'
+require 'time'
 
 class RequestTest < Minitest::Test
   def test_no_cache_delegation
@@ -256,6 +257,35 @@ class RequestTest < Minitest::Test
 
     assert_equal "http://foo.com/bar?baz=true", request.url
     assert_equal "http://foo.com/bar", request.cache_key
+  end
+
+  def test_if_modified_since
+    date = Time.new(2016).httpdate
+    env = { "HTTP_IF_MODIFIED_SINCE" => date }
+    request = Rack::AcornCache::Request.new(env)
+
+    assert_equal date, request.if_modified_since
+  end
+
+  def test_if_none_match
+    env = { "HTTP_IF_NONE_MATCH" => "12345" }
+    request = Rack::AcornCache::Request.new(env)
+
+    assert_equal "12345", request.if_none_match
+  end
+
+
+  def test_conditional
+    env = { "HTTP_IF_NONE_MATCH" => "12345" }
+    request = Rack::AcornCache::Request.new(env)
+
+    assert request.conditional?
+  end
+
+  def test_not_conditional
+    request = Rack::AcornCache::Request.new({})
+
+    refute request.conditional?
   end
 
   def teardown

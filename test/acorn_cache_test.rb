@@ -221,13 +221,38 @@ class AcornCacheTest < Minitest::Test
       }
     end
 
-    response = [304, {"Cache-Control" => "no-store"}, ["foo"]]
+    response = [304, {"Cache-Control" => "no-store"}, []]
     modified_env = env
     modified_env["HTTP_IF_NONE_MATCH"] = "12345"
     app.expects(:call).with(modified_env).returns(response)
 
     result = acorn_cache.call(env)
     assert_equal response, result
+  end
+
+  def test_conditional_request_with_fresh_cached_version
+    app = mock("app")
+    env = Rack::MockRequest.env_for("http://foo.com")
+    env["REQUEST_METHOD"] = "GET"
+    env["HTTP_IF_NONE_MATCH"] = "12345"
+
+    redis = mock("redis")
+    serialized_cached_response = "{\"status\":200,\"headers\":{\"Date\":\"Fri, 01 Jan 2016 05:00:00 GMT\", \"Expires\": \"Sat, 02 Jan 2016 00:00:00 GMT \", \"ETag\": \"12345\"},\"body\":\"foo\"}"
+    Redis.stubs(:new).returns(redis)
+    redis.stubs(:get).returns(serialized_cached_response)
+    Time.stubs(:now).returns(Time.new(2015))
+
+    acorn_cache = Rack::AcornCache.new(app)
+
+    Rack::AcornCache.configure do |config|
+      config.page_rules = {
+        "http://foo.com/" => { respect_existing_headers: true }
+      }
+    end
+
+    result = acorn_cache.call(env)
+    assert_equal 304, result[0]
+    assert_empty result[2]
   end
 
   def teardown
