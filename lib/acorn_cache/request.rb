@@ -41,6 +41,18 @@ class Rack::AcornCache
 
     alias_method :page_rule?, :page_rule
 
+    def if_modified_since
+      env["HTTP_IF_MODIFIED_SINCE"]
+    end
+
+    def if_none_match
+      env["HTTP_IF_NONE_MATCH"]
+    end
+
+    def conditional?
+      if_modified_since || if_none_match
+    end
+
     private
 
     def config

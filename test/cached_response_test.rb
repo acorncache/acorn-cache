@@ -315,6 +315,78 @@ class CachedResponseTest < Minitest::Test
 
     assert_equal Time.httpdate("Mon, 01 Jan 2000 01:00:01 GMT"), result
   end
+
+  def test_not_modified_for_request
+    request = stub(if_modified_since: Time.new(2016).httpdate,
+                   if_none_match: "12345")
+
+    args = { "status" => 200,
+             "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT",
+                             "ETag" => "12345",
+                             "Last-Modified" => Time.new(2015).httpdate },
+             "body" => "test body" }
+
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+
+    assert cached_response.not_modified_for?(request)
+  end
+
+  def test_not_modified_for_request_only_etag
+    request = stub(if_modified_since: nil, if_none_match: "12345")
+
+    args = { "status" => 200,
+             "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT",
+                             "ETag" => "12345" },
+             "body" => "test body" }
+
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+
+    assert cached_response.not_modified_for?(request)
+  end
+
+  def test_not_modified_for_request_only_if_modified_since
+    request = stub(if_modified_since: Time.new(2016).httpdate,
+                   if_none_match: nil)
+
+    args = { "status" => 200,
+             "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT",
+                             "Last-Modified" => Time.new(2015).httpdate },
+             "body" => "test body" }
+
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+
+    assert cached_response.not_modified_for?(request)
+  end
+
+  def test_modified_for_request_only_etag_differs
+    request = stub(if_modified_since: Time.new(2016).httpdate,
+                   if_none_match: "1234")
+
+    args = { "status" => 200,
+             "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT",
+                             "ETag" => "12345",
+                             "Last-Modified" => Time.new(2015).httpdate },
+             "body" => "test body" }
+
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+
+    refute cached_response.not_modified_for?(request)
+  end
+
+  def test_modified_for_request_only_modifed_since
+    request = stub(if_modified_since: Time.new(2015).httpdate,
+                   if_none_match: "12345")
+
+    args = { "status" => 200,
+             "headers" =>  { "Date" => "Mon, 01 Jan 2000 00:00:01 GMT",
+                             "ETag" => "12345",
+                             "Last-Modified" => Time.new(2016).httpdate },
+             "body" => "test body" }
+
+    cached_response = Rack::AcornCache::CachedResponse.new(args)
+
+    refute cached_response.not_modified_for?(request)
+  end
 end
 
 class NullCachedResponseTest < Minitest::Test

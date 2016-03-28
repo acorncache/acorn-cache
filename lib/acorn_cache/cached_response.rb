@@ -63,6 +63,17 @@ class Rack::AcornCache
       end
     end
 
+    def not_modified_for?(request)
+      if request.if_none_match && request.if_modified_since
+        request.if_none_match == etag_header &&
+          not_modified_since?(Time.httpdate(request.if_modified_since))
+      elsif request.if_none_match
+        request.if_none_match == etag_header
+      else
+        not_modified_since?(Time.httpdate(request.if_modified_since))
+      end
+    end
+
     def time_to_live
       s_maxage || max_age || (expiration_date - date)
     end
@@ -103,6 +114,10 @@ class Rack::AcornCache
       Time.httpdate(expiration_header)
     end
 
+    def not_modified_since?(time)
+      Time.httpdate(last_modified_header) < time
+    end
+
     def expiration_header
       @expiration_header ||= headers["Expiration"]
     end
@@ -128,6 +143,10 @@ class Rack::AcornCache
     def update!; end
 
     def fresh_for_request?(request)
+      false
+    end
+
+    def not_modified_for?(request)
       false
     end
   end
