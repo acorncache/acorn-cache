@@ -16,11 +16,11 @@ Features currently available include the following:
 * Adds a custom header to mark responses returned from the cache (`X-Acorn-Cache: HIT`)
 * Removes cookies from server responses prior to caching.
 
-##Getting Started
+## Getting Started
 
 [![Join the chat at https://gitter.im/acorncache/acorn-cache](https://badges.gitter.im/acorncache/acorn-cache.svg)](https://gitter.im/acorncache/acorn-cache?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-####Installation
+#### Installation
 
 Add this line to your application's Gemfile:
 
@@ -54,7 +54,7 @@ require 'acorn_cache'
 use Rack::AcornCache
 ```
 
-####Setting Up Storage
+#### Setting Up Storage
 By default, AcornCache uses Redis to store server responses. You must include
 your Redis host, port, and password (if you have one set) as environment variables.
 
@@ -76,7 +76,7 @@ To switch to Memcached, add the following line to your AcornCache config:
 config.storage = :memcached
 ```
 
-####Configuration
+#### Configuration
 AcornCache has a range of configuration options.  If you're using Rails, set them in an initializer: `config/initializers/acorn_cache.rb`
 
 Without configuration, AcornCache won't cache anything.  Two basic configuration
@@ -126,7 +126,7 @@ Rack::AcornCache.configure do |config|
   }
 end
 ```
-####Deciding Which Resources Are Cached
+#### Deciding Which Resources Are Cached
 Resources best suited for caching are public (not behind authentication) and don't change very often.
 AcornCache provides you with three options for defining the URLs for the resources that you want to cache:
 
@@ -147,8 +147,8 @@ AcornCache provides you with three options for defining the URLs for the resourc
    ```
 
 
-####Deciding How Resources Are Cached
-#####Override Existing Cache Control Headers
+#### Deciding How Resources Are Cached
+##### Override Existing Cache Control Headers
 Suppose you don't know or want to change the cache control headers provided by your server.  AcornCache gives you the ability to control how a resource is
 cached by both AcornCache and the browser cache simply by specifying the
 appropriate page rule settings.
@@ -196,7 +196,7 @@ end
 
 ...then the server response returned by a request to `foo.com/` will be cached in AcornCache for 30 seconds, but the server response returned by a request to `foo.com/helpdocs` will be cached for 100 seconds.
 
-#####Respect Existing Cache Control Headers
+##### Respect Existing Cache Control Headers
 AcornCache provides you with the ability to respect the cache control headers that were provided from the client or origin server.  This can be achieved by setting `respect_existing_headers: true` for a page or given set of pages. This option is useful when you don't want to cache everything but you also want to control caching behavior by ensuring that responses come from your server with the proper cache control headers.  If you choose this option, you will likely want to ensure that your response has an `s-maxage` directive, as AcornCache operates as a shared cache.
 
 ## Further Information
